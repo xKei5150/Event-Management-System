@@ -1,5 +1,6 @@
 import {Box, Flex, Spacer, Button, Image} from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
+import SignInDialog from "../SignInDialog/SignInDialog";
 
 function Navbar() {
     return (
@@ -18,7 +19,7 @@ function Navbar() {
                     <Link to="/events" className="text-red-900 mx-3">Events</Link>
                 </Box>
                 <Spacer />
-                <Button colorScheme={'red'} bg={'red.900'} size={'md'}>Sign In</Button>
+                <SignInDialog />
             </Flex>
         </Box>
     );

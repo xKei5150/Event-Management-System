@@ -1,81 +1,64 @@
-import React, { useState } from 'react';
-import Calendar from 'react-calendar';
-import 'react-calendar/dist/Calendar.css';
-import { Box, Flex, Heading, Text } from '@chakra-ui/react';
+import React from 'react';
+import FullCalendar from '@fullcalendar/react';
+import dayGridPlugin from '@fullcalendar/daygrid';
+import interactionPlugin from '@fullcalendar/interaction';
+import {Text, Box, Flex, Heading} from '@chakra-ui/react';
 
 const EventsPage = () => {
-    const [selectedDate, setSelectedDate] = useState(null);
+    const announcements = [
+        { title: 'Announcement 1', description: 'Description for Announcement 1', datePosted: '2023-07-20', eventDate: '2023-08-15'},
+        { title: 'Announcement 2', description: 'Description for Announcement 2', datePosted: '2023-07-20', eventDate: '2023-08-15'},
+        { title: 'Announcement 1', description: 'Description for Announcement 1', datePosted: '2023-07-20', eventDate: '2023-08-15'},
+        { title: 'Announcement 2', description: 'Description for Announcement 2', datePosted: '2023-07-20', eventDate: '2023-08-15'},
+        { title: 'Announcement 1', description: 'Description for Announcement 1', datePosted: '2023-07-20', eventDate: '2023-08-15'},
+    ];
 
-    const [events, setEvents] = useState([
-        {
-            title: 'Event 1',
-            description: 'Description for Event 1',
-            datePosted: '2023-07-20',
-            eventDate: '2023-08-15',
-        },
-        {
-            title: 'Event 2',
-            description: 'Description for Event 2',
-            datePosted: '2023-07-21',
-            eventDate: '2023-09-10',
-        },
-        // Add more events as needed
-    ]);
-    const [selectedEvent, setSelectedEvent] = useState(null);
+    const events = [
+        { title: 'Event 1', start: '2023-07-20', end: '2023-07-22' },
+        { title: 'Event 2', start: '2023-07-25', end: '2023-07-26' },
+    ];
 
-    const renderEventMarks = ({ date }) => {
-        const event = events.find((event) => date.toDateString() === new Date(event.eventDate).toDateString());
-        if (event) {
-            return (
-                <Box textAlign="center">
-                    <Text fontSize="xs" color="red.500" fontWeight="bold">
-                        {event.title}
-                    </Text>
-                </Box>
-            );
-        }
-        return null;
+    const handleDateClick = (arg) => {
+        console.log('Date clicked:', arg.dateStr);
+    };
+
+    const handleEventClick = (info) => {
+        console.log('Event clicked:', info.event.title);
     };
 
     return (
-        <Box p={8} borderRadius="md" boxShadow="md" bg="white" maxW="1000px" m="auto">
-            <Flex align="start" justify="space-between">
-                {/* Left Side - Events */}
-                <Box w="65%">
-                    <Heading as="h1" size="xl" mb={4}>
-                        Announcements
-                    </Heading>
-                    {events.map((event, index) => (
-                        <Box key={index} bg="gray.100" p={4} borderRadius="md" boxShadow="md" mb={4}>
-                            <Heading as="h2" size="lg" mb={2}>
-                                {event.title}
-                            </Heading>
-                            <Text fontSize="md" mb={2}>
-                                {event.description}
-                            </Text>
-                            <Text fontSize="sm" color="gray.600">
-                                Date Posted: {event.datePosted}
-                            </Text>
-                            <Text fontSize="sm" color="gray.600">
-                                Event Date: {event.eventDate}
-                            </Text>
-                        </Box>
-                    ))}
-                </Box>
-
-                {/* Right Side - Calendar */}
-                <Box w="35%">
-                    <Box bg="white" borderRadius="md" p={4}>
-                        <Calendar
-                            onChange={setSelectedDate}
-                            value={selectedDate}
-                            tileClassName="custom-tile"
-                            tileContent={renderEventMarks}
-                        />
+        <Flex justifyContent="center">
+            <Box bg="white" p="4" borderRadius="lg" boxShadow="md" w="55%" maxW="55%" mr="4">
+                <Heading as="h2" size="lg" mb="4">
+                    Announcements
+                </Heading>
+                {announcements.map((announcement, index) => (
+                    <Box key={index} bg="gray.100" p={4} borderRadius="md" boxShadow="md" mb={4}>
+                        <Heading as="h2" size="lg" mb={2}>
+                            {announcement.title}
+                        </Heading>
+                        <Text fontSize="md" mb={2}>
+                            {announcement.description}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                            Date Posted: {announcement.datePosted}
+                        </Text>
+                        <Text fontSize="sm" color="gray.600">
+                            Event Date: {announcement.eventDate}
+                        </Text>
                     </Box>
-                </Box>
-            </Flex>
-        </Box>
+                ))}
+            </Box>
+            <Box w="40%">
+                <FullCalendar
+                    plugins={[dayGridPlugin, interactionPlugin]}
+                    initialView="dayGridMonth"
+                    events={events}
+                    eventClick={handleEventClick}
+                    dateClick={handleDateClick}
+                />
+            </Box>
+        </Flex>
     );
 };
 
