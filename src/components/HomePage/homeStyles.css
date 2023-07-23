@@ -1,0 +1,38 @@
+/* homeStyles.css */
+
+/* This will ensure the Carousel takes 35% width of the screen */
+.carousel .slider-wrapper {
+    width: 85%; /* Adjust the width as needed */
+    margin: 0 auto;
+}
+
+/* Style each carousel slide */
+.carousel-slide {
+    position: relative;
+    height: 0;
+    padding-bottom: 56.25%; /* This ensures the aspect ratio (16:9) for the images */
+    overflow: hidden;
+}
+
+/* Style the images */
+.carousel-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 1;
+}
+
+/* Create a blurry background for the carousel slide */
+.carousel-blur {
+    width: 100%;
+    height: 100%;
+    position: absolute;
+    top: 0;
+    left: 0;
+    background-size: cover;
+    filter: blur(8px); /* Adjust the blur intensity as needed */
+    z-index: 0;
+}

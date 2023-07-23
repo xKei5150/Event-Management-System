@@ -1,0 +1,81 @@
+
+@font-face {
+    font-family: 'Pageant'; /* Use a name for the font */
+    src: url('./fonts/tartinescriptregular.ttf') format('truetype') /* Add different font formats here */
+}
+
+.loading-container {
+    position: relative;
+}
+
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.7)); /* Adjust the transparency as needed */
+    opacity: 1;
+    animation: fade-out 1.5s ease-in-out infinite;
+}
+
+@keyframes fade-out {
+    0% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0;
+    }
+}
+
+@keyframes rightGlowAnimation {
+    0%, 100% {
+        opacity: 0.3;
+        background: linear-gradient(to right, rgba(176, 48, 96, 0.2) 0%, rgba(176, 48, 96, 0) 20%);
+    }
+    25% {
+        opacity: 0.35;
+    }
+    50% {
+        opacity: 0.7;
+    }
+    75% {
+        opacity: 0.35;
+    }
+}
+
+@keyframes leftGlowAnimation {
+    0%, 100% {
+        opacity: 0.2;
+        background: linear-gradient(to left, rgba(176, 48, 96, 0.2) 0%, rgba(176, 48, 96, 0) 20%);
+    }
+    25% {
+        opacity: 0.25;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    75% {
+        opacity: 0.25;
+    }
+}
+
+@keyframes fadeInOut {
+    0% {
+        opacity: .4;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: .4;
+    }
+}
+
+
+.gradient-text {
+    background: linear-gradient(to left, #B9260F, #EE8372);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+}

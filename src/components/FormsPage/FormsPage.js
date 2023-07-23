@@ -10,12 +10,9 @@ import {
     Center,
 } from '@chakra-ui/react';
 import { IconButton } from '@chakra-ui/react'
+import {AiOutlineClose} from "react-icons/ai";
 
-function CloseIcon() {
-    return null;
-}
-
-const ServicesPage = () => {
+const FormsPage = () => {
     const [section, setSection] = useState('');
     const [teamName, setTeamName] = useState('');
     const [teamPlayers, setTeamPlayers] = useState([]);
@@ -90,9 +87,9 @@ const ServicesPage = () => {
                                 <HStack>
                                     <Text>{player}</Text>
                                     <IconButton
-                                        icon={<CloseIcon/>}
+                                        icon={<AiOutlineClose/>}
                                         variant="ghost"
-                                        colorScheme="teal"
+                                        colorScheme="red"
                                         size="sm"
                                         aria-label="Remove Player"
                                         onClick={() => handleRemovePlayer(index)}
@@ -110,13 +107,13 @@ const ServicesPage = () => {
                             value={playerName}
                             onChange={(e) => setPlayerName(e.target.value)}
                         />
-                        <Button colorScheme="red" size="sm" onClick={handleAddPlayer}>
+                        <Button variant="primary" size="sm" onClick={handleAddPlayer}>
                             Add Player
                         </Button>
                     </HStack>
 
                     <Button
-                        colorScheme="blue"
+                        variant="primary"
                         size="md"
                         mt={4}
                         onClick={handleSubmit}
@@ -133,4 +130,4 @@ const ServicesPage = () => {
     );
 };
 
-export default ServicesPage;
+export default FormsPage;

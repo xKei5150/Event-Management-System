@@ -1,27 +1,37 @@
-import {Box, Flex, Spacer, Button, Image} from '@chakra-ui/react';
-import { Link } from 'react-router-dom';
+import {Box, Flex, Spacer, Image} from '@chakra-ui/react';
+import {Link, useLocation} from 'react-router-dom';
 import SignInDialog from "../SignInDialog/SignInDialog";
 
 function Navbar() {
+    const hideNavbarPaths = ['/pageant'];
+    const location = useLocation();
+    const shouldHideNavbar = () => {
+        return hideNavbarPaths.some((path) => location.pathname.startsWith(path));
+    };
+    if (shouldHideNavbar()) {
+        return null;
+    }
     return (
+        <>
         <Box bg="whiteAlpha.100" py={4} px={8}>
             <Flex alignItems="center">
                 <Box>
                     <Link to="/">
-                        <Image src="/logo.png" className="h-20 w-20"/>
+                        <Image src="/test-logo.png" h={{ base: "7", md: "20" }} />
                     </Link>
                 </Box>
-
+                <Spacer />
                 <Box as="nav" className="text-lg font-bold">
                     <Link to="/" className="text-red-900 ml-5 mr-3">Home</Link>
                     <Link to="/about" className="text-red-900 mx-3">About</Link>
-                    <Link to="/services" className="text-red-900 mx-3">Services</Link>
+                    <Link to="/forms" className="text-red-900 mx-3">Forms</Link>
                     <Link to="/events" className="text-red-900 mx-3">Events</Link>
                 </Box>
-                <Spacer />
                 <SignInDialog />
             </Flex>
         </Box>
+    <Box bg="maroon" height="3px" />
+</>
     );
 }
 
