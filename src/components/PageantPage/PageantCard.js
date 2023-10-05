@@ -119,7 +119,7 @@ const ParticipantCard = ({ participant, onSubmit }) => {
                         isLoading={isSubmitButtonLoading}
                         loadingText="Submitting..."
                         spinnerPlacement="start"
-                        disabled={participant.isSubmitted || isSubmitButtonLoading || !isFormEditable}
+                        disabled={participant.isSubmitted || isSubmitButtonLoading}
                     >
                         {isSubmitButtonLoading ? 'Submitting...' : participant.isSubmitted ? 'Submitted' : 'Submit'}
                     </Button>

@@ -2,8 +2,8 @@ import {Box, Flex, Spacer, Image} from '@chakra-ui/react';
 import {Link, useLocation} from 'react-router-dom';
 import SignInDialog from "../SignInDialog/SignInDialog";
 
-function Navbar() {
-    const hideNavbarPaths = ['/pageant'];
+function DashboardNavbar() {
+    const hideNavbarPaths = ['/pageant', '/dashboard'];
     const location = useLocation();
     const shouldHideNavbar = () => {
         return hideNavbarPaths.some((path) => location.pathname.startsWith(path));
@@ -35,4 +35,4 @@ function Navbar() {
     );
 }
 
-export default Navbar;
+export default DashboardNavbar;

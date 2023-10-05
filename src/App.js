@@ -8,6 +8,8 @@ import EventsPage from './components/EventsPage/EventsPage';
 import NewEventsPage from "./components/EventsPage/NewEventsPage";
 import AnnouncementDetails from "./components/Announcements/AnnouncementDetails";
 import PageantPage from "./components/PageantPage/PageantPage";
+import DashboardApp from "./components/DashboardPage/DashboardApp";
+import Footer from "./components/Footer/Footer";
 import customTheme from './theme';
 
 function App() {
@@ -25,7 +27,9 @@ function App() {
                         <Route path="/events/new" element={<NewEventsPage />} />
                         <Route path="/events/announcement/:id" component={AnnouncementDetails} />
                         <Route path="/pageant" element={<PageantPage />} />
+                        <Route path="/dashboard/*" element={<DashboardApp />} />
                     </Routes>
+                <Footer />
             </Router>
         </ChakraProvider>
     );
