@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import {Box, Flex, FormControl, FormLabel, Input, Textarea, Checkbox, Button, Center, Heading} from '@chakra-ui/react';
+import {Box, FormControl, FormLabel, Input, Textarea, Checkbox, Button, Center, Heading} from '@chakra-ui/react';
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from 'react-datepicker';
-
-function NewEventsPage() {
+import ReactQuill from 'react-quill';
+import 'react-quill/dist/quill.snow.css';
+function AddEvent() {
     const [announcementTitle, setAnnouncementTitle] = useState('');
     const [description, setDescription] = useState('');
     const [place, setPlace] = useState('');
@@ -16,8 +17,7 @@ function NewEventsPage() {
     };
 
     return (
-        <Center>
-            <Box bg="gray.100" p={6} borderRadius="md" width="25em">
+            <Box>
                 <Heading as="h2" size="lg" mb="4" color="red.900">
                     Add New Event
                 </Heading>
@@ -38,15 +38,25 @@ function NewEventsPage() {
 
                     <FormControl mb={4}>
                         <FormLabel htmlFor="description">Description</FormLabel>
-                        <Textarea
+                        <ReactQuill
                             value={description}
-                            onChange={(e) => setDescription(e.target.value)}
-                            required
-                            id="description"
-                            variant="outline"
-                            borderColor="black"
-                            _hover={{borderColor: 'red.700'}}
-                            _focus={{ borderColor: 'red.900' }}
+                            onChange={setDescription}
+                            modules={{
+                                toolbar: [
+                                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                                    [{ header: '1' }, { header: '2' }, { font: [] }],
+                                    [{ list: 'ordered' }, { list: 'bullet' },
+                                        {'indent': '-1'}, {'indent': '+1'}],
+                                    ['link', 'image', 'video'],
+                                    ['clean'],
+                                ],
+                            }}
+                            style={{
+                                backgroundColor: 'white',
+                                borderColor: 'black',
+                                ':hover': { borderColor: 'red.700' },
+                                ':focus': { borderColor: 'red.900' },
+                            }}
                         />
                     </FormControl>
 
@@ -96,12 +106,10 @@ function NewEventsPage() {
                             />
                         </FormControl>
                     )}
-
                     <Button type="submit" variant="primary">Submit</Button>
                 </Box>
             </Box>
-        </Center>
-    );
+    )
 }
 
-export default NewEventsPage;
+export default AddEvent;

@@ -3,25 +3,29 @@ import {
     Table,
     Thead,
     Tbody,
-    Tfoot,
     Tr,
     Th,
     Td,
-    TableCaption,
-    TableContainer, Box, Button,
+    Box, Button, Stack,
 } from '@chakra-ui/react'
 import {Link} from "react-router-dom";
+import './style.css';
 const DashboardEvents = () => {
 
     const eventsData = [
         { id: 1, name: 'Event 1', date: '2023-10-10', location: 'School Gym' },
         { id: 2, name: 'Event 2', date: '2023-11-15', location: 'Auditorium' },
-        // Add more event data as needed
     ];
 
     return (
-        <Box p="4">
-            <Table variant="simple">
+        <Box>
+            <Stack direction='row' spacing={4} mb={4} justify='flex-end'>
+                <Link to={'add-event'}>
+                    <Button variant="primary">Add Event</Button>
+                </Link>
+                <Button variant="primary">Start Foundation Event</Button>
+            </Stack>
+            <Table variant="simple" borderWidth = "3px" className="responsive-table">
                 <Thead>
                     <Tr>
                         <Th>ID</Th>

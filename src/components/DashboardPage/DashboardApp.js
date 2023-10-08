@@ -5,6 +5,7 @@ import DashboardNavbar from './Navbar/Navbar';
 import DashboardSidebar from './Sidebar/Sidebar';
 import DashboardEvents from './Events/Events';
 import ManageEvent from './Events/ManageEvent';
+import AddEvent from './Events/AddEvent';
 import DashboardSettings from './Settings/Settings';
 import {Box, Drawer, DrawerContent, useColorModeValue, useDisclosure} from "@chakra-ui/react";
 
@@ -27,12 +28,21 @@ function DashboardApp() {
                 </Drawer>
                 <DashboardNavbar onOpen={onOpen} />
                 <Box ml={{ base: 0, md: 60 }} p="4">
-                <Routes>
-                    <Route path="/" element={<DashboardPage/>} />
-                    <Route path="/events" element={<DashboardEvents/>} />
-                    <Route path="/events/manage/:id" element={<ManageEvent />} />
-                    <Route path="/settings" element={<DashboardSettings/>} />
-                </Routes>
+                    <Box
+                        mx="auto"
+                        p={4}
+                        bg="white"
+                        boxShadow="md"
+                        borderRadius="md"
+                    >
+                        <Routes>
+                            <Route path="/" element={<DashboardPage/>} />
+                            <Route path="/events" element={<DashboardEvents/>} />
+                            <Route path="/events/add-event" element={<AddEvent />}/>
+                            <Route path="/events/manage/:id" element={<ManageEvent />} />
+                            <Route path="/settings" element={<DashboardSettings/>} />
+                        </Routes>
+                    </Box>
                 </Box>
             </Box>
     );

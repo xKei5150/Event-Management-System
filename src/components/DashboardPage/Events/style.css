@@ -1,0 +1,29 @@
+/* Responsive table layout for small screens */
+@media (max-width: 640px) {
+    .responsive-table {
+        display: block;
+    }
+
+    .responsive-table thead {
+        display: none;
+    }
+
+    .responsive-table tbody tr {
+        display: block;
+        margin-bottom: 1rem;
+        border: 1px solid #e2e8f0;
+        border-radius: 0.25rem;
+    }
+
+    .responsive-table tbody td {
+        display: block;
+        text-align: left;
+        padding: 0.5rem; /* Add padding for cell content */
+        border-bottom: 1px solid #e2e8f0; /* Add a border at the bottom of each cell */
+    }
+
+    .responsive-table tbody td::before {
+        content: attr(data-label);
+        font-weight: bold;
+    }
+}

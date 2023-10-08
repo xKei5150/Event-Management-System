@@ -5,7 +5,7 @@ import HomePage from './components/HomePage/HomePage';
 import AboutPage from './components/AboutPage/AboutPage';
 import FormsPage from './components/FormsPage/FormsPage';
 import EventsPage from './components/EventsPage/EventsPage';
-import NewEventsPage from "./components/EventsPage/NewEventsPage";
+import AddEvent from "./components/DashboardPage/Events/AddEvent";
 import AnnouncementDetails from "./components/Announcements/AnnouncementDetails";
 import PageantPage from "./components/PageantPage/PageantPage";
 import DashboardApp from "./components/DashboardPage/DashboardApp";
@@ -24,7 +24,6 @@ function App() {
                         <Route path="/about" element={<AboutPage/>} />
                         <Route path="/forms" element={<FormsPage/>} />
                         <Route path="/events/*" element={<EventsPage/>} />
-                        <Route path="/events/new" element={<NewEventsPage />} />
                         <Route path="/events/announcement/:id" component={AnnouncementDetails} />
                         <Route path="/pageant" element={<PageantPage />} />
                         <Route path="/dashboard/*" element={<DashboardApp />} />

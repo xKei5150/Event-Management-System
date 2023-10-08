@@ -44,7 +44,7 @@ const EditEvent = () => {
     };
 
     return (
-        <Box p="4">
+        <Box>
             <form onSubmit={handleSubmit(onSubmit)}>
                 <Stack spacing={4}>
                     <FormControl>
