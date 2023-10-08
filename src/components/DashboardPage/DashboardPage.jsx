@@ -1,11 +1,8 @@
 import React from 'react';
 import {
     Box,
-    Heading,
     Text,
-    Center,
     Stack,
-    Image,
     Divider, Avatar,
 } from '@chakra-ui/react';
 
@@ -26,12 +23,7 @@ const DashboardPage = () => {
             </Stack>
             <Divider my="4" />
             <Stack spacing="4">
-                <Text fontSize="xl">ASDGDSfg</Text>
-                <Text>
-                    Ad
-                </Text>
-                <Text>Em</Text>
-                <Text>Pho</Text>
+                <Text fontSize="xl">EVENTS</Text>
             </Stack>
         </Box>
     );

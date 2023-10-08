@@ -1,6 +1,6 @@
 import {Box, Flex, Spacer, Image} from '@chakra-ui/react';
 import {Link, useLocation} from 'react-router-dom';
-import SignInDialog from "../SignInDialog/SignInDialog";
+import SignInDialog from "../../SignInDialog/SignInDialog";
 
 function DashboardNavbar() {
     const hideNavbarPaths = ['/pageant', '/dashboard'];

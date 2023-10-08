@@ -1,7 +1,7 @@
 import React from 'react';
-import Announcements from '../Announcements/Announcements';
-import Calendar from '../Calendar/Calendar';
-import AnnouncementDetails from '../Announcements/AnnouncementDetails';
+import Announcements from '../../Announcements/Announcements';
+import Calendar from '../../Calendar/Calendar';
+import AnnouncementDetails from '../../Announcements/AnnouncementDetails';
 import { Box, Flex } from '@chakra-ui/react';
 import { Route, Routes } from 'react-router-dom';
 

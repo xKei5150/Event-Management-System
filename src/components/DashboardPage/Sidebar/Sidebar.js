@@ -8,13 +8,16 @@ import {
     Icon,
     useColorModeValue,
 } from '@chakra-ui/react';
-import { FiHome, FiTrendingUp, FiSettings } from 'react-icons/fi';
-import { IconType } from 'react-icons';
+import { FiSettings } from 'react-icons/fi';
 import { Link } from "react-router-dom";
+import {GiSharpCrown} from "react-icons/gi";
+import {CgProfile} from "react-icons/cg";
+import {SiEventbrite} from "react-icons/si";
 
 const LinkItems = [
-    { name: 'Profile', icon: FiHome, path: '/dashboard/' }, // Default profile page
-    { name: 'Events', icon: FiTrendingUp, path: '/dashboard/events' },
+    { name: 'Profile', icon: CgProfile, path: '/dashboard/' }, // Default profile page
+    { name: 'Events', icon: SiEventbrite, path: '/dashboard/events' },
+    {name: 'Pageant', icon: GiSharpCrown, path: '/dashboard/pageant'},
     { name: 'Settings', icon: FiSettings, path: '/dashboard/settings' },
 ];
 
