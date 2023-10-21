@@ -51,7 +51,7 @@ const JudgesSection = () => {
             />
             <HStack>
                 <Heading as="h3">Judges</Heading>
-                <Button variant="outline" colorScheme="red" onClick={openJudgeModal} mt={4} align="right" >
+                <Button variant="outline" colorScheme="red" onClick={openJudgeModal} mt={4} textAlign={'right'} >
                     Add Judge
                 </Button>
             </HStack>

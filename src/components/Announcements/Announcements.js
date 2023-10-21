@@ -13,7 +13,7 @@ const Announcements = ({ announcements }) => {
             {announcements.map((announcement, index) => (
                 <Box key={index} bg="gray.100" p={4} borderRadius="md" boxShadow="md" mb={4}>
                     <Heading as="h2" size="lg" mb={2} color="red.900">
-                        <Link to={`announcements/${index}`}>
+                        <Link to={`${index}`}>
                             {announcement.title}
                         </Link>
                     </Heading>

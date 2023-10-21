@@ -22,8 +22,8 @@ function App() {
                         <Route exact path="/" element={<HomePage/>} />
                         <Route path="/about" element={<AboutPage/>} />
                         <Route path="/forms" element={<FormsPage/>} />
-                        <Route path="/events/*" element={<EventsPage/>} />
-                        <Route path="/events/announcement/:id" component={AnnouncementDetails} />
+                        <Route path="/announcements/" element={<EventsPage/>} />
+                        <Route path="/announcements/:id" component={AnnouncementDetails} />
                         <Route path="/pageant" element={<PageantPage />} />
                         <Route path="/dashboard/*" element={<DashboardApp />} />
                     </Routes>
