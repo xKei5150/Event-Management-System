@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import {Alert, AlertIcon, AlertTitle, AlertDescription, CloseButton, useDisclosure} from "@chakra-ui/react";
 import {
     Box,
     Input,
@@ -12,35 +13,72 @@ import {
 } from "@chakra-ui/react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
+import axios from 'axios';
 
 function AddEvent() {
-    const [eventType, setEventType] = useState("");
-    const [eventName, setEventName] = useState("");
-    const [eventDescription, setEventDescription] = useState("");
+    const [event_type, setEventType] = useState("");
+    const [event_name, setEventName] = useState("");
+    const [event_description, setEventDescription] = useState("");
     const [location, setLocation] = useState("");
     const [startDate, setStartDate] = useState(new Date());
     const [endDate, setEndDate] = useState(new Date());
+    const [alert, setAlert] = useState(null);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         const eventDetails = {
-            eventType,
-            eventName,
-            eventDescription,
+            event_type,
+            event_name,
+            event_description,
             location,
-            startDate,
-            endDate,
+            start_date: startDate.toISOString(),  // Convert to ISO string
+            end_date: endDate.toISOString(),
         };
         console.log(eventDetails);
-        // You can now send `eventDetails` to your backend or any desired action
+        try {
+            const response = await axios.post('http://127.0.0.1:8000/v1/add-event/', eventDetails);
+            console.log(response.data);
+            setAlert({
+                status: "success",
+                title: "Event added.",
+                description: "Your event was successfully added.",
+            });
+        } catch (error) {
+            console.error("Error adding event:", error);
+            // Handle error
+            setAlert({
+                status: "error",
+                title: "Error adding event.",
+                description: error.response?.data?.message || "An unexpected error occurred. Please try again.",
+            });
+        }
     };
-
+    const {
+        isOpen: isVisible,
+        onClose,
+        onOpen,
+    } = useDisclosure({ defaultIsOpen: true })
     return (
+        <div>
+        {alert && (
+            <Alert status={alert.status} mt={4}>
+                <AlertIcon />
+                <AlertTitle mr={2}>{alert.title}</AlertTitle>
+                <AlertDescription>{alert.description}</AlertDescription>
+                <CloseButton
+                    alignSelf='flex-start'
+                    position='relative'
+                    right={-1}
+                    top={-1}
+                    onClick={onClose}
+                />
+            </Alert>
+        )}
         <Box maxWidth="600px" margin="auto" mt="50px" p={4}>
             <form onSubmit={handleSubmit}>
                 <FormControl isRequired mb={4}>
                     <FormLabel>Type of Event</FormLabel>
-                    <RadioGroup onChange={setEventType} value={eventType}>
+                    <RadioGroup onChange={setEventType} value={event_type}>
                         <Stack direction="row">
                             <Radio value="Judged Events">Judged Events</Radio>
                             <Radio value="Score-based Events">Score-based Events</Radio>
@@ -53,7 +91,7 @@ function AddEvent() {
                     <Input
                         type="text"
                         placeholder="Enter event name"
-                        value={eventName}
+                        value={event_name}
                         onChange={(e) => setEventName(e.target.value)}
                     />
                 </FormControl>
@@ -62,7 +100,7 @@ function AddEvent() {
                     <FormLabel>Brief Description</FormLabel>
                     <Textarea
                         placeholder="Enter event description"
-                        value={eventDescription}
+                        value={event_description}
                         onChange={(e) => setEventDescription(e.target.value)}
                     />
                 </FormControl>
@@ -100,6 +138,7 @@ function AddEvent() {
                 </Button>
             </form>
         </Box>
+        </div>
     );
 }
 

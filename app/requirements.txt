@@ -1,0 +1,4 @@
+fastapi[all]
+databases[mysql]
+mariadb
+sqlalchemy
