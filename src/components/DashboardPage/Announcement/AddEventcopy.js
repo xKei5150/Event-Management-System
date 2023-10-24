@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import {Box, FormControl, FormLabel, Input, Textarea, Checkbox, Button, Center, Heading} from '@chakra-ui/react';
+import {useState} from 'react';
+import {Box, Button, Checkbox, FormControl, FormLabel, Heading, Input} from '@chakra-ui/react';
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from 'react-datepicker';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+
 function AddEvent() {
     const [announcementTitle, setAnnouncementTitle] = useState('');
     const [description, setDescription] = useState('');
