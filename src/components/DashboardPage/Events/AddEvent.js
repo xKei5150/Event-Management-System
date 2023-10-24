@@ -67,7 +67,7 @@ function AddEvent() {
                 <AlertDescription>{alert.description}</AlertDescription>
                 <CloseButton
                     alignSelf='flex-start'
-                    position='relative'
+                    position='right'
                     right={-1}
                     top={-1}
                     onClick={onClose}

@@ -3,7 +3,6 @@ import {
 } from "@chakra-ui/react";
 import {useState} from "react";
 
-// ... other imports ...
 
 const AddContestantModal = ({ isOpen, onClose, onSubmit, contestant, setContestant, isEditing }) => {
     const [image, setImage] = useState(null);

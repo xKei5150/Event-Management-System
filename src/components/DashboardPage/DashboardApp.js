@@ -8,8 +8,9 @@ import ManageEvent from './Events/ManageEvent';
 import AddEvent from './Events/AddEvent';
 import DashboardSettings from './Settings/Settings';
 import EvaluationForm from '../Evaluation/EvaluationForm';
-import PageantPage from './Pageant/PageantPage';
-import Score from './Pageant/Score/Score';
+import EventPage from './Events/EventPage/EventPage';
+import Score from './Events/EventPage/Score/Score';
+import CriteriaPage from "./Events/EventPage/JudgingEvent/CriteriaPage/CriteriaPage";
 import {Box, Drawer, DrawerContent, useColorModeValue, useDisclosure} from "@chakra-ui/react";
 
 function DashboardApp() {
@@ -43,9 +44,10 @@ function DashboardApp() {
                             <Route path="/events" element={<DashboardEvents/>} />
                             <Route path="/events/add-event" element={<AddEvent />}/>
                             <Route path="/events/manage/:id" element={<ManageEvent />} />
+                            <Route path="/events/:eventName" element={<EventPage />} />
+                            <Route path="/events/:eventName/score" element={<Score />} />
+                            <Route path="/events/:eventName/score/manage-criteria" element={<CriteriaPage/>}></Route>
                             <Route path="/events/evaluate" element ={<EvaluationForm />}/>
-                            <Route path="/pageant" element={<PageantPage />}/>
-                            <Route path="/pageant/score" element={<Score />}/>
                             <Route path="/settings" element={<DashboardSettings/>} />
                         </Routes>
                     </Box>

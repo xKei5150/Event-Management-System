@@ -4,7 +4,7 @@ import ParticipantCard from './PageantCard';
 import './pageant.css';
 
 const PageantPage = () => {
-    document.title = 'Pageant Night';
+    document.title = 'EventPage Night';
 
     const [participants, setParticipants] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
