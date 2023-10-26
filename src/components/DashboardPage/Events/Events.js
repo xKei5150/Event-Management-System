@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import axios from 'axios';
 import {
     Table,
     Thead,
@@ -6,16 +7,28 @@ import {
     Tr,
     Th,
     Td,
-    Box, Button, Stack,
-} from '@chakra-ui/react'
-import {Link} from "react-router-dom";
+    Box,
+    Button,
+    Stack,
+} from '@chakra-ui/react';
+import { Link } from "react-router-dom";
 import './style.css';
-const DashboardEvents = () => {
 
-    const eventsData = [
-        { id: 1, name: 'Event 1', date: '2023-10-10', location: 'School Gym' },
-        { id: 2, name: 'Event 2', date: '2023-11-15', location: 'Auditorium' },
-    ];
+const DashboardEvents = () => {
+    const [events, setEvents] = useState([]);
+
+    useEffect(() => {
+        async function fetchEvents() {
+            try {
+                const response = await axios.get("http://localhost:8000/v1/events");
+                setEvents(response.data);
+            } catch (error) {
+                console.error("Error fetching events:", error);
+            }
+        }
+
+        fetchEvents();
+    }, []);
 
     return (
         <Box>
@@ -25,26 +38,28 @@ const DashboardEvents = () => {
                 </Link>
                 <Button variant="primary">Start Foundation Event</Button>
             </Stack>
-            <Table variant="simple" borderWidth = "3px" className="responsive-table">
+            <Table variant="simple" borderWidth="3px" className="responsive-table">
                 <Thead>
                     <Tr>
                         <Th>ID</Th>
-                        <Th>Name</Th>
-                        <Th>Date</Th>
+                        <Th>Event Type</Th>
+                        <Th>Title</Th>
                         <Th>Location</Th>
+                        <Th>Date</Th>
                         <Th>Action</Th>
                     </Tr>
                 </Thead>
                 <Tbody>
-                    {eventsData.map((event) => (
+                    {events.map((event) => (
                         <Tr key={event.id}>
                             <Td>{event.id}</Td>
-                            <Td>{event.name}</Td>
-                            <Td>{event.date}</Td>
+                            <Td>{event.event_type}</Td>
+                            <Td>{event.event_name}</Td>
                             <Td>{event.location}</Td>
+                            <Td>{event.start_date}</Td>
                             <Td>
                                 <Link to={`manage/${event.id}`}>
-                                <Button variant="primary">Manage Event</Button>
+                                    <Button variant="primary">Manage Event</Button>
                                 </Link>
                             </Td>
                         </Tr>
@@ -52,7 +67,7 @@ const DashboardEvents = () => {
                 </Tbody>
             </Table>
         </Box>
-    )
+    );
 };
 
 export default DashboardEvents;

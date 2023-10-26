@@ -39,9 +39,8 @@ const EventPage = () => {
 
             {event.event_type === "Judged Events" && (
                 <>
-
-                    <JudgesSection />
-                    <ContestantsSection />
+                    <JudgesSection/>
+                    <ContestantsSection/>
                 </>
             )}
 

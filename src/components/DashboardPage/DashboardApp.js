@@ -1,11 +1,12 @@
 import React from 'react';
 import {Route, Routes} from 'react-router-dom';
 import DashboardPage from "./DashboardPage";
+import DashboardAnnouncement from "./Announcement/AnnouncementPage";
+import ManageAnnouncements from "./Announcement/ManageAnnouncement";
 import DashboardNavbar from './Navbar/Navbar';
 import DashboardSidebar from './Sidebar/Sidebar';
 import DashboardEvents from './Events/Events';
 import ManageEvent from './Events/ManageEvent';
-import AddEvent from './Events/AddEvent';
 import DashboardSettings from './Settings/Settings';
 import EvaluationForm from '../Evaluation/EvaluationForm';
 import EventPage from './Events/EventPage/EventPage';
@@ -38,12 +39,16 @@ function DashboardApp() {
                         bg="white"
                         boxShadow="md"
                         borderRadius="md"
+                        minH = "80vh"
                     >
                         <Routes>
                             <Route path="/" element={<DashboardPage/>} />
+                            <Route path="/announcement" element={<DashboardAnnouncement/>} />
+                            <Route path="/announcement/manage/" element={<ManageAnnouncements/>} />
+                            <Route path="/announcement/manage/:announcementId" element={<ManageAnnouncements/>} />
                             <Route path="/events" element={<DashboardEvents/>} />
-                            <Route path="/events/add-event" element={<AddEvent />}/>
-                            <Route path="/events/manage/:id" element={<ManageEvent />} />
+                            <Route path="/events/add-event" element={<ManageEvent />}/>
+                            <Route path="/events/manage/:eventId" element={<ManageEvent />} />
                             <Route path="/events/:eventName" element={<EventPage />} />
                             <Route path="/events/:eventName/score" element={<Score />} />
                             <Route path="/events/:eventName/score/manage-criteria" element={<CriteriaPage/>}></Route>

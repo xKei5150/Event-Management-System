@@ -4,7 +4,7 @@ import {
     Button, Box, Table, Tbody, Td, Th, Thead, Tr, Text
 } from '@chakra-ui/react';
 import CriteriaModal from './CriteriaModal';
-import {useParams} from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const CriteriaPage = () => {
     const [categories, setCategories] = useState([]);
@@ -13,6 +13,7 @@ const CriteriaPage = () => {
     const [eventId, setEventId] = useState(null);
     const { eventName } = useParams();
     const formattedEventName = eventName.replace(/-/g, ' ');
+
     useEffect(() => {
         const fetchEventId = async () => {
             try {
@@ -25,12 +26,17 @@ const CriteriaPage = () => {
 
         fetchEventId();
     }, [eventName]);
+
     useEffect(() => {
-        fetchCategories();
-    }, []);
-    const fetchCategories = async () => {
+        if (eventId) {
+            fetchCategories(eventId);
+        }
+    }, [eventId]);
+
+    const fetchCategories = async (event_id) => {
         try {
-            const response = await axios.get('http://127.0.0.1:8000/v1/categories/');
+            console.log(event_id);
+            const response = await axios.get(`http://127.0.0.1:8000/v1/categories/?event_id=${event_id}`);
             setCategories(response.data);
         } catch (error) {
             console.error('Error fetching categories:', error);
@@ -41,9 +47,9 @@ const CriteriaPage = () => {
         setSelectedCategory(category);
         setIsModalOpen(true);
     };
+
     const handleAddCategory = (event_id) => {
         setSelectedCategory(null);  // Ensure this is null when adding a new category
-        setEventId(event_id);  // Set the current event ID
         setIsModalOpen(true);
     };
 
@@ -107,7 +113,7 @@ const CriteriaPage = () => {
                     isOpen={isModalOpen}
                     onClose={() => {
                         setIsModalOpen(false);
-                        fetchCategories();
+                        fetchCategories(eventId);  // Fetch updated categories list after closing modal
                     }}
                     setCategories={setCategories}
                     selectedCategory={selectedCategory}

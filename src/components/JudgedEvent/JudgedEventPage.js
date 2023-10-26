@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Center, Grid, Text, Image } from '@chakra-ui/react';
-import ParticipantCard from './PageantCard';
-import './pageant.css';
+import ParticipantCard from './ContestantCard';
+import './judged.css';
 
-const PageantPage = () => {
+const JudgedEventPage = () => {
     document.title = 'EventPage Night';
 
     const [participants, setParticipants] = useState([]);
@@ -84,4 +84,4 @@ const PageantPage = () => {
     );
 };
 
-export default PageantPage;
+export default JudgedEventPage;

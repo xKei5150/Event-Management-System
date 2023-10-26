@@ -8,7 +8,7 @@ import {
 
 const DashboardPage = () => {
     return (
-        <Box p="4" bg="">
+        <Box p="4" >
             <Stack direction="row" spacing="4" align="center" mt="4">
                 <Avatar
                     size={'2xl'}

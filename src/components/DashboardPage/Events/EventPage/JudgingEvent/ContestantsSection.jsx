@@ -1,22 +1,30 @@
 import {
-    Button, Table, Thead, Tbody, Tr, Th, Td, HStack, Heading,
+    Button, Table, Thead, Tbody, Tr, Th, Td, HStack, Heading, Text,
 } from "@chakra-ui/react";
-import { useState } from "react";
-import AddContestantModal from './AddContestantModal';  // Import the new modal component
+import {useEffect, useState} from "react";
+import AddContestantModal from './AddContestantModal';
+import axios from "axios";
+import {useParams} from "react-router-dom";
 
 const ContestantsSection = () => {
     const [isContestantModalOpen, setIsContestantModalOpen] = useState(false);
     const [contestants, setContestants] = useState([]);
+    const [error, setError] = useState("");
+    const [isLoading, setIsLoading] = useState(true);
     const [contestant, setContestant] = useState({
         name: "",
         organization: "",
+        contestant_number: 0
     });
-    const [isEditing, setIsEditing] = useState(false); // New state to determine if we are in edit mode
+    const [isEditing, setIsEditing] = useState(false);
     const [editingIndex, setEditingIndex] = useState(null);
+    const [eventId, setEventId] = useState(null);
+
     const openContestantModal = () => setIsContestantModalOpen(true);
+
     const closeContestantModal = () => {
         setIsContestantModalOpen(false);
-        setContestant({ name: "", organization: "" });
+        setContestant({ name: "", organization: "", contestant_number: 0 });
     };
 
     const openEditModal = (index) => {
@@ -31,14 +39,48 @@ const ContestantsSection = () => {
             const updatedContestants = [...contestants];
             updatedContestants[editingIndex] = contestantData;
             setContestants(updatedContestants);
-            setIsEditing(false); // Reset edit mode
-            setEditingIndex(null); // Clear the editing index
+            setIsEditing(false);
+            setEditingIndex(null);
         } else {
             setContestants([...contestants, contestantData]);
         }
         closeContestantModal();
     };
 
+
+    const { eventName } = useParams();  // Get the event_name from URL
+    const formattedEventName = eventName.replace(/-/g, ' ');
+
+    useEffect(() => {
+        // Fetch the event to get its event_id
+        const fetchEvent = async () => {
+            try {
+                const eventResponse = await axios.get(`http://127.0.0.1:8000/v1/events/${formattedEventName}`);
+                const eventId = eventResponse.data.id;
+                setEventId(eventId);
+
+                // Fetch contestants after eventId is set
+                await fetchContestants(eventId);
+
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        };
+
+        const fetchContestants = async (eventId) => {
+            setIsLoading(true);
+            try {
+                const response = await axios.get(`http://localhost:8000/v1/contestants/${eventId}`);
+                setContestants(response.data);
+            } catch (err) {
+                setError(err.message);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchEvent();
+    }, [eventName]);
 
 
     return (
@@ -50,6 +92,7 @@ const ContestantsSection = () => {
                 contestant={contestant}
                 setContestant={setContestant}
                 isEditing={isEditing}
+                eventId={eventId}
             />
 
             <HStack>
@@ -58,31 +101,34 @@ const ContestantsSection = () => {
                     Add Contestant
                 </Button>
             </HStack>
-            <Table variant="simple" mt={4}>
-                <Thead>
-                    <Tr>
-                        <Th>No.</Th>
-                        <Th>Name</Th>
-                        <Th>Organization</Th>
-                        <Th>Action</Th>
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    {contestants.map((contestant, index) => (
-                        <Tr key={index}>
-                            <Td>{index + 1}</Td>
-                            <Td>{contestant.name}</Td>
-                            <Td>{contestant.organization}</Td>
-                            <Td>
-                                {/* Example of edit functionality.
-                     Further functionality can be implemented based on requirements */}
-                                <Button variant="ghost" onClick={() => openEditModal(index)}>Edit</Button>
-                            </Td>
-                        </Tr>
-                    ))}
-                </Tbody>
-            </Table>
 
+            {isLoading ? (
+                <Text mt={4}>Loading contestants...</Text>
+            ) : (
+                <Table variant="simple" mt={4}>
+                    <Thead>
+                        <Tr>
+                            <Th>Contestant No.</Th>
+                            <Th>Name</Th>
+                            <Th>Organization</Th>
+                            <Th>Action</Th>
+                        </Tr>
+                    </Thead>
+                    <Tbody>
+                        {contestants.map((contestant, index) => (
+                            <Tr key={index}>
+                                <Td>{contestant.contestant_number}</Td>
+                                <Td>{contestant.name}</Td>
+                                <Td>{contestant.organization}</Td>
+                                <Td>
+                                    <Button variant="ghost" onClick={() => openEditModal(index)}>Edit</Button>
+                                </Td>
+                            </Tr>
+                        ))}
+                    </Tbody>
+                </Table>
+            )}
+            {error && <Text color="red.500" mt={4}>{error}</Text>}
         </>
     );
 };

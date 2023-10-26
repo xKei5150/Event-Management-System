@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Box, Text, FormControl, FormLabel, Input, Flex, Image, Button } from '@chakra-ui/react';
-import './pageant.css';
+import './judged.css';
 
 const ParticipantCard = ({ participant, onSubmit }) => {
     const [swimwearScore, setSwimwearScore] = useState(participant.swimwear);

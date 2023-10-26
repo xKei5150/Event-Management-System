@@ -17,8 +17,8 @@ import { SiEventbrite } from 'react-icons/si';
 
 const staticLinks = [
     { name: 'Profile', icon: CgProfile, path: '/dashboard/' },
+    { name: 'Announcements', icon: CgProfile, path: '/dashboard/announcement/' },
     { name: 'Events', icon: SiEventbrite, path: '/dashboard/events' },
-    { name: 'Pageant', icon: GiSharpCrown, path: '/dashboard/pageant' },
     { name: 'Settings', icon: FiSettings, path: '/dashboard/settings' },
 ];
 

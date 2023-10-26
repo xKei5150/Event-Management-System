@@ -6,13 +6,12 @@ import AboutPage from './components/MainPage/AboutPage/AboutPage';
 import FormsPage from './components/MainPage/FormsPage/FormsPage';
 import EventsPage from './components/MainPage/EventsPage/EventsPage';
 import AnnouncementDetails from "./components/Announcements/AnnouncementDetails";
-import PageantPage from "./components/PageantPage/PageantPage";
+import JudgedEventPage from "./components/JudgedEvent/JudgedEventPage";
 import DashboardApp from "./components/DashboardPage/DashboardApp";
 import Footer from "./components/MainPage/Footer/Footer";
 import customTheme from './theme';
 
 function App() {
-
     return (
         <ChakraProvider theme={customTheme}>
             <CSSReset />
@@ -24,7 +23,7 @@ function App() {
                         <Route path="/forms" element={<FormsPage/>} />
                         <Route path="/announcements/" element={<EventsPage/>} />
                         <Route path="/announcements/:id" component={AnnouncementDetails} />
-                        <Route path="/pageant" element={<PageantPage />} />
+                        <Route path="/pageant" element={<JudgedEventPage />} />
                         <Route path="/dashboard/*" element={<DashboardApp />} />
                     </Routes>
                 <Footer />

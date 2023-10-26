@@ -1,26 +1,80 @@
-import {useState} from 'react';
 import {Box, Button, Checkbox, FormControl, FormLabel, Heading, Input} from '@chakra-ui/react';
 import 'react-datepicker/dist/react-datepicker.css';
 import DatePicker from 'react-datepicker';
 import ReactQuill from 'react-quill';
 import 'react-quill/dist/quill.snow.css';
+import axios from 'axios';
+import { useEffect, useState } from 'react';
+import {useParams} from "react-router-dom";
 
-function AddEvent() {
+function ManageAnnouncements() {
+    const { announcementId } = useParams();
     const [announcementTitle, setAnnouncementTitle] = useState('');
     const [description, setDescription] = useState('');
-    const [place, setPlace] = useState('');
+    const [location, setLocation] = useState('');
     const [startDate, setStartDate] = useState(null);
     const [endDate, setEndDate] = useState(null);
     const [addEventDate, setAddEventDate] = useState(false);
-
+    const [isLoading, setIsLoading] = useState(false);
     const handleCheckboxChange = () => {
         setAddEventDate(!addEventDate);
     };
 
+    useEffect(() => {
+        async function fetchAnnouncementData() {
+            if (announcementId) {
+                try {
+                    const response = await axios.get(`http://localhost:8000/v1/announcements/id/${announcementId}`);
+
+                    setAnnouncementTitle(response.data.announcement);
+                    setDescription(response.data.description);
+                    setLocation(response.data.location);
+                    setStartDate(response.data.startDate);
+                    setEndDate(response.data.endDate);
+                } catch (error) {
+                    console.error("Error fetching announcement data:", error);
+                    // Handle the error appropriately
+                } finally {
+                    setIsLoading(false);
+                }
+            }
+        }
+
+        fetchAnnouncementData();
+    }, [announcementId]);
+
+    const handleSubmit = async () => {
+        try {
+            if (announcementId) {
+                // Update the existing announcement
+                await axios.put(`http://localhost:8000/v1/announcements/id/${announcementId}`, {
+                    announcement: announcementTitle,
+                    description: description,
+                    location: location,
+                    startDate: startDate,
+                    endDate: endDate
+                });
+            } else {
+                // Create a new announcement
+                await axios.post('http://localhost:8000/v1/add-announcement/', {
+                    announcement: announcementTitle,
+                    description: description,
+                    location: location,
+                    startDate: startDate,
+                    endDate: endDate
+                });
+            }
+            // Handle successful submission: notify the user, redirect, etc.
+        } catch (error) {
+            console.error("Error submitting the form:", error);
+            // Handle the error appropriately
+        }
+    }
+    const isEditing = !!announcementId;
     return (
             <Box>
                 <Heading as="h2" size="lg" mb="4" color="red.900">
-                    Add New Event
+                    {isEditing ? "Update Announcement" : "Add New Announcement"}
                 </Heading>
                 <Box bg="gray.200" p={6} borderRadius="md">
                     <FormControl mb={4}>
@@ -62,10 +116,10 @@ function AddEvent() {
                     </FormControl>
 
                     <FormControl mb={4}>
-                        <FormLabel htmlFor="place">Place</FormLabel>
+                        <FormLabel htmlFor="place">Location</FormLabel>
                         <Input
-                            value={place}
-                            onChange={(e) => setPlace(e.target.value)}
+                            value={location}
+                            onChange={(e) => setLocation(e.target.value)}
                             required
                             id="place"
                             variant="outline"
@@ -107,10 +161,12 @@ function AddEvent() {
                             />
                         </FormControl>
                     )}
-                    <Button type="submit" variant="primary">Submit</Button>
+                    <Button type="submit" variant="primary" onClick={handleSubmit}>
+                        {isEditing ? "Update" : "Submit"}
+                    </Button>
                 </Box>
             </Box>
     )
 }
 
-export default AddEvent;
+export default ManageAnnouncements;
