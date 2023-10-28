@@ -10,7 +10,7 @@ import {
     Tr,
     Th,
     Td,
-    Heading, HStack,
+    Heading, HStack, Flex, Spacer,
 } from '@chakra-ui/react';
 
 function DashboardAnnouncement() {
@@ -44,16 +44,17 @@ function DashboardAnnouncement() {
 
     return (
         <Box p={5}>
-            <HStack>
+            <Flex mb={3}>
                 <Heading as="h2" size="lg" mb="4" color="red.900">
                     Announcements List
                 </Heading>
+                <Spacer />
                 <Link to={'manage/'}>
                     <Button variant="primary">
                         Add Announcement
                     </Button>
                 </Link>
-            </HStack>
+            </Flex>
 
             <Table variant="simple">
                 <Thead>

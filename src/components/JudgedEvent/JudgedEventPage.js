@@ -1,34 +1,95 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Center, Grid, Text, Image } from '@chakra-ui/react';
-import ParticipantCard from './ContestantCard';
+import {
+    Box, Center, Grid, Text, Image, Flex, VStack,
+    FormControl, FormLabel, InputGroup, HStack, Input, Button, Heading
+} from '@chakra-ui/react';
 import './judged.css';
+import axios from 'axios';
+import { useParams } from "react-router-dom";
 
 const JudgedEventPage = () => {
-    document.title = 'EventPage Night';
-
-    const [participants, setParticipants] = useState([]);
+    const [contestants, setContestants] = useState([]);
     const [isLoading, setIsLoading] = useState(true);
+    const [eventTitle, setEventTitle] = useState('');
+    const [eventId, setEventId] = useState('');
+    const [judgeName, setJudgeName] = useState('');
+    const [categories, setCategories] = useState([]);
+    const [scores, setScores] = useState({});
+    const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
-    const initialParticipants = [
-        { id: 1, image: 'participants/taylor.jpeg', group: 'Golden Hills', name: 'Taylor Sheeesh', swimwear: 9.5, longGown: 5.5, talent: 6.7, isSubmitted: false },
-        { id: 2, image: 'participants/selena.jpg', group: 'Blue Ridge', name: 'Selena Gomez', swimwear: 3.5, longGown: 0.0, talent: 2.7, isSubmitted: false },
-        { id: 3, image: 'participants/chrissy.jpg', group: 'Red Fishers', name: 'Christina Costanza', swimwear: 10, longGown: 10, talent: 10, isSubmitted: false },
-        { id: 4, image: 'participants/ariana.jpg', group: 'Bowling Green', name: 'Ariana Grande', swimwear: 8, longGown: 7, talent: 10, isSubmitted: false },
-    ];
+    const { eventName, judgeId } = useParams();
+
+    const [allJudgesSubmitted, setAllJudgesSubmitted] = useState(false);
 
     useEffect(() => {
-        setTimeout(() => {
-            setParticipants(initialParticipants);
-            setIsLoading(false);
-        }, 3000);
-    }, []);
+        const fetchData = async () => {
+            try {
+                const eventResponse = await axios.get(`http://127.0.0.1:8000/v1/events/${eventName}`);
+                setEventTitle(eventResponse.data.event_name);
+                setEventId(eventResponse.data.id);
+                const judgeResponse = await axios.get(`http://localhost:8000/v1/judges/id/${judgeId}`);
+                setJudgeName(judgeResponse.data.name);
+                const contestantsResponse = await axios.get(`http://127.0.0.1:8000/v1/contestant-by-event/${eventResponse.data.id}`);
+                setContestants(contestantsResponse.data);
+                const categoriesResponse = await axios.get(`http://127.0.0.1:8000/v1/categories?event_id=${eventResponse.data.id}`);
+                setCategories(categoriesResponse.data);
+                setIsLoading(false);
+            } catch (error) {
+                console.error("Failed to fetch data:", error);
+                setIsLoading(false);
+            }
+        };
 
-    const handleParticipantSubmit = (participantId, isSubmitted) => {
-        setParticipants((prevState) => {
-            return prevState.map((participant) =>
-                participant.id === participantId ? { ...participant, isSubmitted } : participant
-            );
-        });
+        fetchData();
+    }, [eventName, judgeId]);
+
+    useEffect(() => {
+        // This checks if all judges have submitted for the current category
+        const checkAllJudgesSubmitted = async () => {
+            const response = await axios.get(`http://127.0.0.1:8000/v1/scores/check-category-submission/${categories[activeCategoryIndex].id}`);
+            console.log(response.data.allSubmitted);
+            setAllJudgesSubmitted(response.data.allSubmitted);
+        };
+
+        if (categories.length > 0) {
+            checkAllJudgesSubmitted();
+        }
+    }, [activeCategoryIndex, categories]);
+
+    const handleNextCategory = () => {
+        if (activeCategoryIndex < categories.length - 1) {
+            setActiveCategoryIndex(prevIndex => prevIndex + 1);
+        }
+    };
+
+    const handleScoreChange = (contestantId, criteriaId, e) => {
+        const updatedScores = { ...scores };
+        if (!updatedScores[contestantId]) {
+            updatedScores[contestantId] = {};
+        }
+        updatedScores[contestantId][criteriaId] = e.target.value;
+        setScores(updatedScores);
+    };
+
+    const handleSubmitScores = async () => {
+        for (let contestantId in scores) {
+            for (let criteriaId in scores[contestantId]) {
+                const scoreData = {
+                    judge_id: judgeId,
+                    contestant_id: contestantId,
+                    category_id: categories[activeCategoryIndex].id,
+                    criteria_id: criteriaId,
+                    score: scores[contestantId][criteriaId]
+                };
+
+                try {
+                    await axios.post('http://127.0.0.1:8000/v1/scores/', scoreData);
+                } catch (error) {
+                    console.error("Failed to submit score for contestant:", contestantId, "error:", error);
+                }
+            }
+        }
+        console.log("Scores submitted");
     };
 
     return (
@@ -46,9 +107,14 @@ const JudgedEventPage = () => {
                 ) : (
                     <>
                         <Center mb={8}>
-                            <Text fontSize="4xl" fontWeight="bold" fontFamily="pageant" className="gradient-text">
-                                Pageant Night
-                            </Text>
+                            <VStack>
+                                <Text fontSize="4xl" fontWeight="bold" fontFamily="roboto"  textTransform="uppercase">
+                                    {eventTitle || 'Loading...'}
+                                </Text>
+                                <Text fontWeight="bold" fontSize="2xl" mb={4}>
+                                   Category: {categories[activeCategoryIndex].name}
+                                </Text>
+                            </VStack>
                         </Center>
 
                         <Center>
@@ -56,30 +122,70 @@ const JudgedEventPage = () => {
                                 templateColumns={{ base: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }}
                                 gap={8}
                             >
-                                {participants.map((participant) => (
-                                    <ParticipantCard
-                                        key={participant.id}
-                                        participant={participant}
-                                        onSubmit={handleParticipantSubmit}
-                                        isSubmitted={participant.isSubmitted}
-                                    />
+                                {contestants.map((contestant) => (
+                                    <Box key={contestant.id} p={4} bg="#333333" color="white" borderRadius="lg" maxW="32em" maxH="45em">
+                                        <Flex direction="column" align="center">
+                                            <Image src={`http://127.0.0.1:8000/v1/images/${contestant.image_path}`} alt={contestant.name} boxSize="200px" mb={2} />
+                                            <Text fontSize="xl" fontWeight="bold">
+                                                {contestant.name}
+                                            </Text>
+                                            <Text fontSize="md" color="gray.400">
+                                                {contestant.organization}
+                                            </Text>
+
+                                            {categories.length > 0 && (
+                                                <VStack align="start" spacing={4}>
+                                                    {categories[activeCategoryIndex].criteria.map(criterion => (
+                                                        <FormControl key={criterion.id} isRequired>
+                                                            <Flex>
+                                                                <FormLabel htmlFor={criterion.label} mb="0" flexShrink={0} mr={2}>
+                                                                    {criterion.label}:
+                                                                </FormLabel>
+                                                                <InputGroup>
+                                                                    <Input
+                                                                        type="number"
+                                                                        id={criterion.label}
+                                                                        min={criterion.min_score}
+                                                                        max="100"
+                                                                        minW="9em"
+                                                                        placeholder={`Score (Min: ${criterion.min_score})`}
+                                                                        onChange={(e) => handleScoreChange(contestant.id, criterion.id, e)}
+                                                                        value={scores[contestant.id]?.[criterion.id] || ''}
+                                                                    />
+
+                                                                </InputGroup>
+                                                            </Flex>
+                                                        </FormControl>
+                                                    ))}
+                                                </VStack>
+                                            )}
+                                        </Flex>
+                                    </Box>
+
                                 ))}
                             </Grid>
                         </Center>
-                        <Center>
-                            <Box
-                                as="div"
-                                bgImage="url(/participants/Miss-EU.png)"
-                                bgSize="10em"
-                                bgRepeat="no-repeat"
-                                w="10em"
-                                h="10em"
-                                animation="fadeInOut 2s linear infinite"
-                            />
+                        <Center mt={6}>
+                            <VStack>
+                                <HStack spacing={4}>
+                                    {categories.length > 0 && (
+                                        <Button onClick={handleNextCategory} disabled={!allJudgesSubmitted}>
+                                            Next Category
+                                        </Button>
+                                    )}
+                                    <Button variant="primary" onClick={handleSubmitScores}>
+                                        Submit
+                                    </Button>
+                                </HStack>
+                                <Heading>
+                                   Judge: {judgeName}
+                                </Heading>
+                            </VStack>
                         </Center>
                     </>
                 )}
             </Box>
+
         </Box>
     );
 };

@@ -29,8 +29,8 @@ function ManageAnnouncements() {
                     setAnnouncementTitle(response.data.announcement);
                     setDescription(response.data.description);
                     setLocation(response.data.location);
-                    setStartDate(response.data.startDate);
-                    setEndDate(response.data.endDate);
+                    setStartDate(response.data.startDate ? new Date(response.data.startDate) : null);
+                    setEndDate(response.data.endDate ? new Date(response.data.endDate) : null);
                 } catch (error) {
                     console.error("Error fetching announcement data:", error);
                     // Handle the error appropriately
@@ -51,8 +51,8 @@ function ManageAnnouncements() {
                     announcement: announcementTitle,
                     description: description,
                     location: location,
-                    startDate: startDate,
-                    endDate: endDate
+                    startDate: startDate ? startDate.toISOString() : null,
+                    endDate: endDate ? endDate.toISOString() : null
                 });
             } else {
                 // Create a new announcement
@@ -60,8 +60,8 @@ function ManageAnnouncements() {
                     announcement: announcementTitle,
                     description: description,
                     location: location,
-                    startDate: startDate,
-                    endDate: endDate
+                    startDate: startDate ? startDate.toISOString() : null,
+                    endDate: endDate ? endDate.toISOString() : null
                 });
             }
             // Handle successful submission: notify the user, redirect, etc.
@@ -96,6 +96,7 @@ function ManageAnnouncements() {
                         <ReactQuill
                             value={description}
                             onChange={setDescription}
+
                             modules={{
                                 toolbar: [
                                     ['bold', 'italic', 'underline', 'strike', 'blockquote'],
@@ -107,6 +108,8 @@ function ManageAnnouncements() {
                                 ],
                             }}
                             style={{
+                                minHeight: "200px",
+                                overflowY: "auto",
                                 backgroundColor: 'white',
                                 borderColor: 'black',
                                 ':hover': { borderColor: 'red.700' },
@@ -142,7 +145,7 @@ function ManageAnnouncements() {
                         <FormControl mb={4}>
                             <FormLabel>Start Date</FormLabel>
                             <DatePicker
-                                selected={startDate}
+                                selected={startDate ? startDate : null}
                                 onChange={(date) => setStartDate(date)}
                                 dateFormat="yyyy-MM-dd"
                                 placeholderText="yyyy-MM-dd"
@@ -154,7 +157,7 @@ function ManageAnnouncements() {
                         <FormControl mb={4}>
                             <FormLabel>End Date</FormLabel>
                             <DatePicker
-                                selected={endDate}
+                                selected={endDate ? endDate : null}
                                 onChange={(date) => setEndDate(date)}
                                 dateFormat="yyyy-MM-dd"
                                 placeholderText="yyyy-MM-dd "

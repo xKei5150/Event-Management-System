@@ -9,7 +9,7 @@ import {
     Td,
     Box,
     Button,
-    Stack,
+    Stack, Heading, Flex, Spacer,
 } from '@chakra-ui/react';
 import { Link } from "react-router-dom";
 import './style.css';
@@ -32,12 +32,15 @@ const DashboardEvents = () => {
 
     return (
         <Box>
-            <Stack direction='row' spacing={4} mb={4} justify='flex-end'>
+            <Flex mb={3}>
+                <Heading>
+                    Events
+                </Heading>
+                <Spacer />
                 <Link to={'add-event'}>
                     <Button variant="primary">Add Event</Button>
                 </Link>
-                <Button variant="primary">Start Foundation Event</Button>
-            </Stack>
+            </Flex>
             <Table variant="simple" borderWidth="3px" className="responsive-table">
                 <Thead>
                     <Tr>

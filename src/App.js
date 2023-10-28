@@ -10,6 +10,7 @@ import JudgedEventPage from "./components/JudgedEvent/JudgedEventPage";
 import DashboardApp from "./components/DashboardPage/DashboardApp";
 import Footer from "./components/MainPage/Footer/Footer";
 import customTheme from './theme';
+import EventGateway from "./components/JudgedEvent/EventGateway";
 
 function App() {
     return (
@@ -23,7 +24,8 @@ function App() {
                         <Route path="/forms" element={<FormsPage/>} />
                         <Route path="/announcements/" element={<EventsPage/>} />
                         <Route path="/announcements/:id" component={AnnouncementDetails} />
-                        <Route path="/pageant" element={<JudgedEventPage />} />
+                        <Route path="/event/" element={<EventGateway/>} />
+                        <Route path="/event/:eventName/:judgeId" element={<JudgedEventPage />} />
                         <Route path="/dashboard/*" element={<DashboardApp />} />
                     </Routes>
                 <Footer />

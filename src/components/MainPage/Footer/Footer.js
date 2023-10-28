@@ -21,7 +21,7 @@ const ListHeader = ({ children }) => {
 export default function Footer() {
     const bgColor = useColorModeValue('gray.50', 'gray.900');
     const textColor = useColorModeValue('gray.700', 'gray.200');
-    const hideFooterPaths = ['/pageant', '/dashboard'];
+    const hideFooterPaths = ['/event', '/dashboard'];
     const location = useLocation();
     const shouldHideFooter = () => {
         return hideFooterPaths.some((path) => location.pathname.startsWith(path));

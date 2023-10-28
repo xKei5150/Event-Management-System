@@ -3,21 +3,20 @@ import axios from 'axios';
 import {
     Box,
     Flex,
-    Text,
     Image,
     CloseButton,
     Icon,
-    useColorModeValue, VStack, Collapse, Button,
+    useColorModeValue, Collapse, Button,
 } from '@chakra-ui/react';
 import { Link } from 'react-router-dom';
 import {FiChevronDown, FiChevronRight, FiSettings} from 'react-icons/fi';
-import { GiSharpCrown } from 'react-icons/gi';
 import { CgProfile } from 'react-icons/cg';
 import { SiEventbrite } from 'react-icons/si';
+import {TfiAnnouncement} from "react-icons/tfi";
 
 const staticLinks = [
     { name: 'Profile', icon: CgProfile, path: '/dashboard/' },
-    { name: 'Announcements', icon: CgProfile, path: '/dashboard/announcement/' },
+    { name: 'Announcements', icon: TfiAnnouncement, path: '/dashboard/announcement/' },
     { name: 'Events', icon: SiEventbrite, path: '/dashboard/events' },
     { name: 'Settings', icon: FiSettings, path: '/dashboard/settings' },
 ];

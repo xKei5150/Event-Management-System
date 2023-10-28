@@ -70,7 +70,7 @@ const ContestantsSection = () => {
         const fetchContestants = async (eventId) => {
             setIsLoading(true);
             try {
-                const response = await axios.get(`http://localhost:8000/v1/contestants/${eventId}`);
+                const response = await axios.get(`http://localhost:8000/v1/contestant-by-event/${eventId}`);
                 setContestants(response.data);
             } catch (err) {
                 setError(err.message);

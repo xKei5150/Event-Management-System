@@ -1,6 +1,6 @@
 
 @font-face {
-    font-family: 'Pageant'; /* Use a name for the font */
+    font-family: 'Roboto'; /* Use a name for the font */
     src: url('./fonts/tartinescriptregular.ttf') format('truetype') /* Add different font formats here */
 }
 
@@ -72,10 +72,3 @@
     }
 }
 
-
-.gradient-text {
-    background: linear-gradient(to left, #B9260F, #EE8372);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-}

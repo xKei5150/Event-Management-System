@@ -3,7 +3,7 @@ import {Link, useLocation} from 'react-router-dom';
 import SignInDialog from "../../SignInDialog/SignInDialog";
 
 function DashboardNavbar() {
-    const hideNavbarPaths = ['/pageant', '/dashboard'];
+    const hideNavbarPaths = ['/event', '/dashboard'];
     const location = useLocation();
     const shouldHideNavbar = () => {
         return hideNavbarPaths.some((path) => location.pathname.startsWith(path));
