@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
     Box, Center, Grid, Text, Image, Flex, VStack,
-    FormControl, FormLabel, InputGroup, HStack, Input, Button, Heading
+    FormControl, FormLabel, InputGroup, HStack, Input, Button, Heading, Td, Table, Thead, Tr, Th, Tbody
 } from '@chakra-ui/react';
 import './judged.css';
 import axios from 'axios';
 import { useParams } from "react-router-dom";
+import { useSpring, animated } from 'react-spring';
 
 const JudgedEventPage = () => {
     const [contestants, setContestants] = useState([]);
@@ -14,7 +15,13 @@ const JudgedEventPage = () => {
     const [eventId, setEventId] = useState('');
     const [judgeName, setJudgeName] = useState('');
     const [categories, setCategories] = useState([]);
-    const [scores, setScores] = useState({});
+    const [scores, setScores] = useState({})
+    const [editMode, setEditMode] = useState(false);
+    const [hasSubmitted, setHasSubmitted] = useState(false);
+
+    const [animationProps, set] = useSpring(() => ({ opacity: 1, transform: 'scale(1)' }));
+    const [animationCompleted, setAnimationCompleted] = useState(false);
+
     const [activeCategoryIndex, setActiveCategoryIndex] = useState(0);
 
     const { eventName, judgeId } = useParams();
@@ -90,7 +97,50 @@ const JudgedEventPage = () => {
             }
         }
         console.log("Scores submitted");
+        handleMergeAnimation();
+        setEditMode(false);
     };
+
+    const handleMergeAnimation = () => {
+        set({
+            opacity: 0,
+            transform: 'scale(0.5)',
+            onRest: () => setAnimationCompleted(true)
+        });
+    };
+    const handleEditScores = () => {
+        setHasSubmitted(false);
+        set({
+            opacity: 1,
+            transform: 'scale(0.5)',
+            onRest: () => {
+                setAnimationCompleted(false);
+                setEditMode(true);
+            }
+        });
+    };
+
+    const calculateResults = () => {
+        const results = Object.keys(scores).map(contestantId => {
+            const totalScore = Object.values(scores[contestantId]).reduce((a, b) => Number(a) + Number(b), 0); // Ensure scores are numbers before adding
+            const avgScore = (totalScore / (Object.keys(scores[contestantId]).length * 100)) * 100;
+            return {
+                contestantId,
+                avgScore,
+                totalScore
+            };
+        });
+
+        // Rank contestants
+        results.sort((a, b) => b.avgScore - a.avgScore);
+        results.forEach((res, idx) => (res.rank = idx + 1));
+
+        return results;
+    };
+
+
+
+    const results = animationCompleted ? calculateResults() : [];
 
     return (
         <Box bg="black" color="white" minW="100vw" minH="100vh">
@@ -118,65 +168,107 @@ const JudgedEventPage = () => {
                         </Center>
 
                         <Center>
-                            <Grid
-                                templateColumns={{ base: 'repeat(1, 1fr)', sm: 'repeat(2, 1fr)', md: 'repeat(2, 1fr)', lg: 'repeat(4, 1fr)' }}
-                                gap={8}
-                            >
-                                {contestants.map((contestant) => (
-                                    <Box key={contestant.id} p={4} bg="#333333" color="white" borderRadius="lg" maxW="32em" maxH="45em">
-                                        <Flex direction="column" align="center">
-                                            <Image src={`http://127.0.0.1:8000/v1/images/${contestant.image_path}`} alt={contestant.name} boxSize="200px" mb={2} />
-                                            <Text fontSize="xl" fontWeight="bold">
-                                                {contestant.name}
-                                            </Text>
-                                            <Text fontSize="md" color="gray.400">
-                                                {contestant.organization}
-                                            </Text>
+                            <Flex flexDirection={{ base: "column", md: "row" }} gap='1em'>
+                                {!animationCompleted ?
+                                    !hasSubmitted && contestants.map((contestant) => (
+                                        <animated.div style={animationProps} key={contestant.id}>
+                                            <Box p={4} bg="#333333" color="white" borderRadius="lg" maxW="32em" maxH="45em">
+                                                <Flex direction="column" align="center">
+                                                    <Image src={`http://127.0.0.1:8000/v1/images/${contestant.image_path}`} alt={contestant.name} boxSize="200px" mb={2} />
+                                                    <Text fontSize="xl" fontWeight="bold">
+                                                        {contestant.name}
+                                                    </Text>
+                                                    <Text fontSize="md" color="gray.400">
+                                                        {contestant.organization}
+                                                    </Text>
 
-                                            {categories.length > 0 && (
-                                                <VStack align="start" spacing={4}>
+                                                    {categories.length > 0 && (
+                                                        <VStack align="start" spacing={4}>
+                                                            {categories[activeCategoryIndex].criteria.map(criterion => (
+                                                                <FormControl key={criterion.id} isRequired>
+                                                                    <Flex>
+                                                                        <FormLabel htmlFor={criterion.label} mb="0" flexShrink={0} mr={2}>
+                                                                            {criterion.label}:
+                                                                        </FormLabel>
+                                                                        <InputGroup>
+                                                                            <Input
+                                                                                type="number"
+                                                                                id={criterion.label}
+                                                                                min={criterion.min_score}
+                                                                                max="100"
+                                                                                minW="9em"
+                                                                                placeholder={`Score (Min: ${criterion.min_score})`}
+                                                                                onChange={(e) => handleScoreChange(contestant.id, criterion.id, e)}
+                                                                                value={scores[contestant.id]?.[criterion.id] || ''}
+                                                                            />
+                                                                        </InputGroup>
+                                                                    </Flex>
+                                                                </FormControl>
+                                                            ))}
+                                                        </VStack>
+                                                    )}
+                                                </Flex>
+                                            </Box>
+
+                                        </animated.div>
+                                    ))
+                                    :
+                                    <Box width="100%" p={4} bg="#333333" color="white" borderRadius="lg" maxW="full" alignContent={"center"}>
+                                        <Table variant="simple">
+                                            <Thead>
+                                                <Tr>
+                                                    <Th>Rank</Th>
+                                                    <Th>Contestant</Th>
                                                     {categories[activeCategoryIndex].criteria.map(criterion => (
-                                                        <FormControl key={criterion.id} isRequired>
-                                                            <Flex>
-                                                                <FormLabel htmlFor={criterion.label} mb="0" flexShrink={0} mr={2}>
-                                                                    {criterion.label}:
-                                                                </FormLabel>
-                                                                <InputGroup>
-                                                                    <Input
-                                                                        type="number"
-                                                                        id={criterion.label}
-                                                                        min={criterion.min_score}
-                                                                        max="100"
-                                                                        minW="9em"
-                                                                        placeholder={`Score (Min: ${criterion.min_score})`}
-                                                                        onChange={(e) => handleScoreChange(contestant.id, criterion.id, e)}
-                                                                        value={scores[contestant.id]?.[criterion.id] || ''}
-                                                                    />
-
-                                                                </InputGroup>
-                                                            </Flex>
-                                                        </FormControl>
+                                                        <Th key={criterion.id}>{criterion.label}</Th>
                                                     ))}
-                                                </VStack>
-                                            )}
-                                        </Flex>
+                                                    <Th>Total Score</Th>
+                                                    <Th>Average Score (%)</Th>
+                                                </Tr>
+                                            </Thead>
+                                            <Tbody>
+                                                {results.map((result) => (
+                                                    <Tr key={result.contestantId}>
+                                                        <Td>{result.rank}</Td>
+                                                        <Td>
+                                                            <Text>
+                                                                {contestants.find(c => c.id === parseInt(result.contestantId)).name}
+                                                            </Text>
+                                                        </Td>
+                                                        {categories[activeCategoryIndex].criteria.map(criterion => (
+                                                            <Td key={criterion.id}>
+                                                                {scores[result.contestantId]?.[criterion.id] || 'N/A'}
+                                                            </Td>
+                                                        ))}
+                                                        <Td>{result.totalScore}</Td>
+                                                        <Td>{result.avgScore.toFixed(2)}</Td>
+                                                    </Tr>
+                                                ))}
+                                            </Tbody>
+                                        </Table>
+                                        {categories.length > 0 && animationCompleted && (
+                                            <Button onClick={handleNextCategory} disabled={!allJudgesSubmitted}>
+                                                Next Category
+                                            </Button>
+                                        )}
+                                        <Button onClick={handleEditScores} mt={4}>
+                                            Edit Scores
+                                        </Button>
                                     </Box>
-
-                                ))}
-                            </Grid>
+                                }
+                            </Flex>
                         </Center>
+
                         <Center mt={6}>
                             <VStack>
-                                <HStack spacing={4}>
-                                    {categories.length > 0 && (
-                                        <Button onClick={handleNextCategory} disabled={!allJudgesSubmitted}>
-                                            Next Category
+                                    {!editMode &&
+                                        <Button variant="primary" onClick={() => {
+                                            handleSubmitScores();
+                                            setHasSubmitted(true);
+                                        }}>
+                                            Submit
                                         </Button>
-                                    )}
-                                    <Button variant="primary" onClick={handleSubmitScores}>
-                                        Submit
-                                    </Button>
-                                </HStack>
+                                    }
                                 <Heading>
                                    Judge: {judgeName}
                                 </Heading>

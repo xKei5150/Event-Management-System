@@ -66,6 +66,7 @@ const CriteriaPage = () => {
                             <Th>Category</Th>
                             <Th>Criteria</Th>
                             <Th>Min. Score</Th>
+                            <Th>Max. Score</Th>
                             <Th>Action</Th>
                         </Tr>
                     </Thead>
@@ -80,6 +81,7 @@ const CriteriaPage = () => {
                                         <>
                                             <Td>{category.criteria[0].label}</Td>
                                             <Td>{category.criteria[0].min_score}</Td>
+                                            <Td>{category.criteria[0].max_score}</Td>
                                             <Td rowSpan={category.criteria.length || 1}>
                                                 <Button onClick={() => handleEditClick(category)}>
                                                     Edit
@@ -102,6 +104,7 @@ const CriteriaPage = () => {
                                     <Tr key={crit.id}>
                                         <Td>{crit.label}</Td>
                                         <Td>{crit.min_score}</Td>
+                                        <Td>{crit.max_score}</Td>
                                     </Tr>
                                 ))}
                             </React.Fragment>
