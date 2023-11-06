@@ -40,7 +40,7 @@ const JudgesSection = () => {
         setLoginToken(token);
     };
 
-    const { eventName } = useParams();  // Get the event_name from URL
+    const { eventName } = useParams();
     const formattedEventName = eventName.replace(/-/g, ' ');
     useEffect(() => {
         // Fetch the event to get its event_id

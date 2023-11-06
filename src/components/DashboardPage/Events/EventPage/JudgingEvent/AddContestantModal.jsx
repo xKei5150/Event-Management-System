@@ -6,6 +6,7 @@ import axios from "axios";
 
 const API_URL = "http://localhost:8000/v1/contestants/";
 const ORGANIZATIONS = ["Golden Hills", "Blue Ridge", "Red Fishers", "Bowling Green"];
+const LEVEL = ["Elementary", "Jr. High School", "Sr. High School", "College"];
 
 const AddContestantModal = ({ isOpen, onClose, onSubmit, contestant, setContestant, isEditing, eventId }) => {
     const [imagePreview, setImagePreview] = useState(null);
@@ -40,36 +41,50 @@ const AddContestantModal = ({ isOpen, onClose, onSubmit, contestant, setContesta
 
     const handleSubmit = async () => {
         setIsLoading(true);
+
+        const formData = new FormData();
+        formData.append('contestant_number', contestant.contestant_number);
+        formData.append('name', contestant.name);
+        formData.append('organization', contestant.organization);
+        formData.append('event_id', eventId); // Assuming `eventId` is defined in the component's state
+        formData.append('level', contestant.level); // Add the level to the formData
+
+        // Only add the image if one has been selected
+        if (image) {
+            formData.append('image', image);
+        }
+
         try {
-            const method = isEditing ? "PUT" : "POST";
-            const baseurl = isEditing ? `${API_URL}${contestant.id}/` : API_URL;
+            // Determine the HTTP method and URL based on whether we are editing or adding a contestant
+            const method = isEditing ? 'PUT' : 'POST';
+            const url = isEditing ? `${API_URL}${contestant.id}/` : `${API_URL}`;
 
-            // Construct the URL with query parameters
-            const url = `${baseurl}?contestant_number=${contestant.contestant_number}&name=${contestant.name}&organization=${contestant.organization}&event_id=${eventId}`;
-
-            const formData = new FormData();
-            if (image) {
-                formData.append("image", image);
-            }
-
+            // Make the request
             const response = await axios({
-                method,
-                url,
+                method: method,
+                url: url,
                 data: formData,
                 headers: {
-                    'Content-Type': 'multipart/form-data'
-                }
+                    'Content-Type': 'multipart/form-data',
+                },
             });
 
+            // Handle the response
             onSubmit(response.data, image);
-            setImage(null);
-            setIsLoading(false);
-
         } catch (err) {
+            // Handle the error
+            console.error('Error submitting the form:', err);
+            alert(err.response?.data?.detail || err.message);
+        } finally {
+            // Always turn off the loading indicator
             setIsLoading(false);
-            alert(err.response?.data?.detail[0]?.msg || err.message);
+            setImage(null); // Reset the image state if needed
         }
     };
+
+    if(isLoading) {
+        return <Spinner />;
+    }
 
 
     return (
@@ -96,6 +111,24 @@ const AddContestantModal = ({ isOpen, onClose, onSubmit, contestant, setContesta
                     >
                         {ORGANIZATIONS.map(org => <option key={org} value={org}>{org}</option>)}
                     </Select>
+                    <Select
+                        value={contestant.level !== null ? LEVEL[contestant.level] : ''}
+                        onChange={(e) => {
+                            const levelIndex = LEVEL.indexOf(e.target.value); // This gets the index of the selected level
+                            if (levelIndex !== -1) {
+                                setContestant({ ...contestant, level: levelIndex }); // Set the index as the level value
+                            }
+                        }}
+                        mb={4}
+                        placeholder="Select Level"
+                    >
+                        {LEVEL.map((lvl, index) => (
+                            <option key={lvl} value={lvl}> {/* Use the string label as the value */}
+                                {lvl}
+                            </option>
+                        ))}
+                    </Select>
+
                     <NumberInput
                         value={contestant.contestant_number}
                         onChange={(value) => setContestant({ ...contestant, contestant_number: value })}

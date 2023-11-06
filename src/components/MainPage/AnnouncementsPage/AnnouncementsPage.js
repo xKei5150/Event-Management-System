@@ -6,7 +6,7 @@ import { Box, Flex } from '@chakra-ui/react';
 import { Route, Routes } from 'react-router-dom';
 
 
-const EventsPage = () => {
+const AnnouncementsPage = () => {
     const announcements = [
         { title: 'School Calendar for School Year 2023-2024',
             description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, ' +
@@ -66,4 +66,4 @@ const EventsPage = () => {
     );
 };
 
-export default EventsPage;
+export default AnnouncementsPage;

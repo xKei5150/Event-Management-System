@@ -23,9 +23,10 @@ function DashboardNavbar() {
                 <Spacer />
                 <Box as="nav" className="text-lg font-bold">
                     <Link to="/" className="text-red-900 ml-5 mr-3">Home</Link>
+                    <Link to="/announcements" className="text-red-900 mx-3">Announcements</Link>
+                    <Link to="/forms" className="text-red-900 mx-3">Events</Link>
                     <Link to="/about" className="text-red-900 mx-3">About</Link>
-                    <Link to="/forms" className="text-red-900 mx-3">Forms</Link>
-                    <Link to="/announcements" className="text-red-900 mx-3">Events</Link>
+
                 </Box>
                 <SignInDialog />
             </Flex>

@@ -11,8 +11,9 @@ import DashboardSettings from './Settings/Settings';
 import EvaluationForm from '../Evaluation/EvaluationForm';
 import EventPage from './Events/EventPage/EventPage';
 import Score from './Events/EventPage/Score/Score';
-import CriteriaPage from "./Events/EventPage/JudgingEvent/CriteriaPage/CriteriaPage";
+import CriteriaPage from "./Events/EventPage/JudgingEvent/CriteriaPage/CategoryPage";
 import {Box, Drawer, DrawerContent, useColorModeValue, useDisclosure} from "@chakra-ui/react";
+import ScoreEntryComponent from "./Events/EventPage/ScoreBasedEvent/ScoreEntryPage/ScoreEntryComponent";
 
 function DashboardApp() {
     const { isOpen, onOpen, onClose } = useDisclosure();
@@ -52,6 +53,7 @@ function DashboardApp() {
                             <Route path="/events/:eventName" element={<EventPage />} />
                             <Route path="/events/:eventName/score" element={<Score />} />
                             <Route path="/events/:eventName/score/manage-criteria" element={<CriteriaPage/>}></Route>
+                            <Route path="/events/:eventName/score/manage-scores" element={<ScoreEntryComponent/>}></Route>
                             <Route path="/events/evaluate" element ={<EvaluationForm />}/>
                             <Route path="/settings" element={<DashboardSettings/>} />
                         </Routes>

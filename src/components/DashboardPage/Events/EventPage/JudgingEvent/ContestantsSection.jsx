@@ -14,6 +14,7 @@ const ContestantsSection = () => {
     const [contestant, setContestant] = useState({
         name: "",
         organization: "",
+        level: null,
         contestant_number: 0
     });
     const [isEditing, setIsEditing] = useState(false);
@@ -24,7 +25,7 @@ const ContestantsSection = () => {
 
     const closeContestantModal = () => {
         setIsContestantModalOpen(false);
-        setContestant({ name: "", organization: "", contestant_number: 0 });
+            setContestant({ name: "", organization: "", level: 0, contestant_number: 0 });
     };
 
     const openEditModal = (index) => {
@@ -111,6 +112,7 @@ const ContestantsSection = () => {
                             <Th>Contestant No.</Th>
                             <Th>Name</Th>
                             <Th>Organization</Th>
+                            <Th>Level</Th>
                             <Th>Action</Th>
                         </Tr>
                     </Thead>
@@ -120,6 +122,7 @@ const ContestantsSection = () => {
                                 <Td>{contestant.contestant_number}</Td>
                                 <Td>{contestant.name}</Td>
                                 <Td>{contestant.organization}</Td>
+                                <Td>{contestant.level}</Td>
                                 <Td>
                                     <Button variant="ghost" onClick={() => openEditModal(index)}>Edit</Button>
                                 </Td>

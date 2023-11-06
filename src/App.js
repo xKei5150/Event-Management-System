@@ -3,8 +3,8 @@ import {BrowserRouter as Router, Route, Routes} from 'react-router-dom';
 import Navbar from './components/MainPage/Navbar/Navbar';
 import HomePage from './components/MainPage/HomePage/HomePage';
 import AboutPage from './components/MainPage/AboutPage/AboutPage';
-import FormsPage from './components/MainPage/FormsPage/FormsPage';
-import EventsPage from './components/MainPage/EventsPage/EventsPage';
+import FormsPage from './components/MainPage/EventsPage/TournamentBracket';
+import AnnouncementsPage from './components/MainPage/AnnouncementsPage/AnnouncementsPage';
 import AnnouncementDetails from "./components/Announcements/AnnouncementDetails";
 import JudgedEventPage from "./components/JudgedEvent/JudgedEventPage";
 import DashboardApp from "./components/DashboardPage/DashboardApp";
@@ -22,7 +22,7 @@ function App() {
                         <Route exact path="/" element={<HomePage/>} />
                         <Route path="/about" element={<AboutPage/>} />
                         <Route path="/forms" element={<FormsPage/>} />
-                        <Route path="/announcements/" element={<EventsPage/>} />
+                        <Route path="/announcements/" element={<AnnouncementsPage/>} />
                         <Route path="/announcements/:id" component={AnnouncementDetails} />
                         <Route path="/event/" element={<EventGateway/>} />
                         <Route path="/event/:eventName/:judgeId" element={<JudgedEventPage />} />

@@ -1,245 +1,183 @@
-import React, {useEffect, useState} from 'react';
+import React, {useState} from 'react';
 import {
-    Button, FormControl, FormLabel, Input, NumberInput, NumberInputField,
-    Modal, ModalOverlay, ModalContent, ModalHeader, ModalFooter, ModalBody, ModalCloseButton, VStack, HStack,
-    Tab,
-    Tabs,
-    TabList,
-    TabPanels,
-    TabPanel, Select
-} from '@chakra-ui/react';
-import axios from "axios";
+    Box,
+    HStack,
+    FormControl,
+    FormLabel,
+    Input,
+    NumberInput,
+    NumberInputField,
+    Button,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalCloseButton,
+    ModalBody,
+    ModalFooter,
+    Select,
+    Spinner,
+} from "@chakra-ui/react";
+import { useForm, useFieldArray } from 'react-hook-form';
 
-const CriteriaModal = ({ isOpen, onClose, categories, setCategories, selectedCategory, setSelectedCategory, eventId }) => {
-    const [activeTab, setActiveTab] = useState(0);  // 0 for Custom Criteria, 1 for Reference Existing Criteriaf
-    const [categoryName, setCategoryName] = useState("");  // Name of the category being edited or added
-    const [criteria, setCriteria] = useState([]);  // Criteria for the category being edited or added
-    const [referencedCategoryId, setReferencedCategoryId] = useState(null);  // ID of the category being referenced (for Reference Existing Criteria)
-    const [percentage, setPercentage] = useState(0);  // Percentage for Reference Existing Criteria
-    const [allCategories, setAllCategories] = useState([]);
+// Assuming fetchCategory, fetchCategoryDetails, fetchCriteria, updateCategory are correctly implemented
+import { fetchCategory, fetchCategoryDetails, fetchCriteria, updateCategory } from "./categoryAPI";
 
-    const handleTabChange = (index) => {
-        setActiveTab(index);
-    };
-
-    useEffect(() => {
-        if (selectedCategory) {
-            setCategoryName(selectedCategory.name);
-            const mappedCriteria = selectedCategory.criteria.map(crit => ({
-                id: crit.id,
-                label: crit.label,
-                min: crit.min_score || crit.min,
-                max: crit.max_score || crit.max
-            }));
-            setCriteria(mappedCriteria);
-        } else {
-            setCategoryName('');
-            setCriteria([{ label: '', min: 0, max: 0 }]);
+const CriteriaModal = ({ isOpen, onClose, allCategories, categoryId }) => {
+    const [isLoading, setIsLoading] = React.useState(false);
+    const [category, setCategory] = React.useState(null);
+    const [mode, setMode] = useState(null);
+    const { register, control, handleSubmit, setValue, reset } = useForm({
+        defaultValues: {
+            customCriteria: [],
+            referencedCriteria: [],
         }
-    }, [selectedCategory]);
+    });
+    const { fields: customCriteriaFields, append: appendCustomCriteria, remove: removeCustom } = useFieldArray({
+        control,
+        name: "customCriteria"
+    });
+    const { fields: referencedCriteriaFields, append: appendReferencedCriteria, remove: removeReference } = useFieldArray({
+        control,
+        name: "referencedCriteria"
+    });
 
-    useEffect(() => {
-        // Fetch all categories when the modal is opened
-        const fetchAllCategories = async () => {
+    React.useEffect(() => {
+        const fetchDataForCategory = async () => {
+            setIsLoading(true);
             try {
-                const response = await axios.get('http://127.0.0.1:8000/v1/categories_with_events/');
-                setAllCategories(response.data);
+                const fetchedCategory = await fetchCategory(categoryId);
+                setCategory(fetchedCategory);
+                setMode(fetchedCategory.mode);
+                const fetchedCriteria = await fetchCriteria(categoryId);
+                // Assuming fetchedCriteria is an object with custom_criteria and referenced_criteria arrays
+                setValue('customCriteria', fetchedCriteria.custom_criteria);
+                setValue('referencedCriteria', fetchedCriteria.referenced_criteria);
             } catch (error) {
-                console.error("Failed to fetch all categories:", error);
+                console.error('Error fetching data for category:', error);
             }
+            setIsLoading(false);
         };
 
-        if (isOpen) {
-            fetchAllCategories();
+        if (categoryId) {
+            fetchDataForCategory();
         }
-    }, [isOpen]);
+    }, [categoryId, setValue]);
 
-    const handleSaveCategory = async () => {
-        if (activeTab === 0) {
-            // Handle Custom Criteria (categories table & endpoint)
-            if (selectedCategory) {
-                // Edit mode
-                try {
-                    const response = await axios.put(`http://127.0.0.1:8000/v1/categories/${selectedCategory.id}`, {
-                        name: categoryName,
-                        criteria: criteria
-                    });
-
-                    if (response.status === 200) {
-                        // Update the categories state to reflect the edited category
-                        const updatedCategories = categories.map(cat =>
-                            cat.id === selectedCategory.id ? { ...cat, name: categoryName, criteria } : cat
-                        );
-                        setCategories(updatedCategories);
-                    } else {
-                        console.error('Failed to update the category:', response.data);
-                    }
-                } catch (error) {
-                    console.error('Error updating the category:', error);
-                }
-            } else {
-                // Add new category mode
-                try {
-                    const response = await axios.post('http://127.0.0.1:8000/v1/categories/', {
-                        name: categoryName,
-                        event_id: eventId,
-                        criteria: criteria
-                    });
-
-                    if (response.status === 200) {
-                        // Update the categories state to reflect the added category
-                        const newCategory = response.data;
-                        if (!newCategory.criteria) {
-                            newCategory.criteria = [];
-                        }
-                        setCategories(prevState => [...prevState, newCategory]);
-                    } else {
-                        console.error('Failed to add the category:', response.data);
-                    }
-                } catch (error) {
-                    console.error('Error adding the category:', error);
-                }
-            }
-        } else if (activeTab === 1) {
-            // Handle Reference Existing Criteria (categories_by_reference table & endpoint)
-            try {
-                const payload = {
-                    name: categoryName,
-                    category_id: referencedCategoryId,  // Assuming you have this state set from the dropdown
-                    percentage: percentage  // Assuming you have a state named percentage for this
-                };
-
-                if (selectedCategory) {
-                    // Edit mode
-                    const response = await axios.put(`http://127.0.0.1:8000/v1/categories_by_reference/${selectedCategory.id}`, payload);
-
-                    if (response.status !== 200) {
-                        console.error('Failed to update the referenced category:', response.data);
-                    }
-                } else {
-                    // Add new referenced category mode
-                    const response = await axios.post('http://127.0.0.1:8000/v1/categories_by_reference/', payload);
-
-                    if (response.status !== 200) {
-                        console.error('Failed to add the referenced category:', response.data);
-                    }
-                }
-            } catch (error) {
-                console.error('Error handling the referenced category:', error);
-            }
+    const onSubmit = async (data) => {
+        setIsLoading(true);
+        try {
+            // Assuming updateCategory API is expecting the correct format
+            await updateCategory(categoryId, data.customCriteria, data.referencedCriteria);
+            onClose();
+        } catch (error) {
+            console.error('Error updating category:', error);
         }
-
-        // Close the modal and clear the selected category
-        onClose();
-        setSelectedCategory(null);
+        setIsLoading(false);
     };
 
-
+    const handleClose = () => {
+        reset();
+        onClose();
+    };
 
     return (
-        <Modal isOpen={isOpen} onClose={onClose}>
+        <Modal isOpen={isOpen} onClose={handleClose}>
             <ModalOverlay />
             <ModalContent>
-                <ModalHeader>
-                    {selectedCategory ? "Edit Category" : "Add Category"}
-                </ModalHeader>
+                <ModalHeader>Manage {category?.name}</ModalHeader>
                 <ModalCloseButton />
                 <ModalBody>
-                    <Tabs isLazy onChange={handleTabChange}>
-                        <TabList>
-                            <Tab>Custom Criteria</Tab>
-                            <Tab>Reference Existing Criteria</Tab>
-                        </TabList>
-
-                        <TabPanels>
-                            {/* Custom Criteria Tab */}
-                            <TabPanel>
-                                <VStack spacing={4}>
-                                    <FormControl>
-                                        <FormLabel>Category Name</FormLabel>
-                                        <Input value={categoryName} onChange={(e) => setCategoryName(e.target.value)} />
-                                    </FormControl>
-                                    {criteria.map((criterion, index) => (
-                                        <HStack key={index} width="full" spacing={4}>
-                                            <FormControl flex="2">
-                                                <FormLabel>Criteria Label</FormLabel>
-                                                <Input
-                                                    value={criterion.label}
-                                                    onChange={(e) => {
-                                                        const updatedCriteria = [...criteria];
-                                                        updatedCriteria[index].label = e.target.value;
-                                                        setCriteria(updatedCriteria);
-                                                    }}
-                                                />
-                                            </FormControl>
-                                            <FormControl flex="1">
-                                                <FormLabel>Minimum Score</FormLabel>
-                                                <NumberInput value={criterion.min} min={0} max={100}>
-                                                    <NumberInputField
-                                                        onChange={(e) => {
-                                                            const updatedCriteria = [...criteria];
-                                                            updatedCriteria[index].min = e.target.value;
-                                                            setCriteria(updatedCriteria);
-                                                        }}
+                    {isLoading ? (
+                        <Spinner />
+                    ) : (
+                        <form onSubmit={handleSubmit(onSubmit)}>
+                            {!mode ? (
+                                <>
+                                    <Box>
+                                        {customCriteriaFields.map((field, index) => (
+                                            <HStack key={field.id} width="full" spacing={4}>
+                                                <FormControl flex="2">
+                                                    <FormLabel htmlFor={`customCriteria[${index}].label`}>Criteria Label</FormLabel>
+                                                    <Input
+                                                        id={`customCriteria[${index}].label`}
+                                                        {...register(`customCriteria.${index}.label`)}
                                                     />
-                                                </NumberInput>
-                                            </FormControl>
-                                            <FormControl flex="1">
-                                                <FormLabel>Maximum Score</FormLabel>
-                                                <NumberInput value={criterion.max} min={0} max={100}>
-                                                    <NumberInputField
-                                                        onChange={(e) => {
-                                                            const updatedCriteria = [...criteria];
-                                                            updatedCriteria[index].max = e.target.value;
-                                                            setCriteria(updatedCriteria);
-                                                        }}
-                                                    />
-                                                </NumberInput>
-                                            </FormControl>
-                                        </HStack>
-                                    ))}
-                                    <Button variant="link" onClick={() => setCriteria([...criteria, { label: '', min: 0, max: 0}])}>
-                                        + Add Criteria
+                                                </FormControl>
+                                                <FormControl flex="1">
+                                                    <FormLabel htmlFor={`customCriteria[${index}].min`}>Minimum Percentage</FormLabel>
+                                                    <NumberInput min={0} max={100}>
+                                                        <NumberInputField
+                                                            id={`customCriteria[${index}].min`}
+                                                            {...register(`customCriteria.${index}.min`, { valueAsNumber: true })}
+                                                        />
+                                                    </NumberInput>
+                                                </FormControl>
+                                                <FormControl flex="1">
+                                                    <FormLabel htmlFor={`customCriteria[${index}].max`}>Maximum Percentage</FormLabel>
+                                                    <NumberInput min={0} max={100}>
+                                                        <NumberInputField
+                                                            id={`customCriteria[${index}].max`}
+                                                            {...register(`customCriteria.${index}.max`, { valueAsNumber: true })}
+                                                        />
+                                                    </NumberInput>
+                                                </FormControl>
+                                                <Button onClick={() => removeCustom(index)}>Delete</Button>
+                                            </HStack>
+                                        ))}
+                                    </Box>
+                                    <Button variant="link" onClick={() => appendCustomCriteria({ label: "", min: 0, max: 100 })}>
+                                        + Add Custom Criteria
                                     </Button>
-                                </VStack>
-                            </TabPanel>
-
-                            {/* Reference Existing Criteria Tab */}
-                            <TabPanel>
-                                <VStack spacing={4}>
-                                    <FormControl>
-                                        <FormControl>
-                                            <FormLabel>Category Name</FormLabel>
-                                            <Input value={categoryName} onChange={(e) => setCategoryName(e.target.value)} />
-                                        </FormControl>
-                                        <FormLabel>Select Criteria to Reference</FormLabel>
-                                        <Select
-                                            placeholder="Select existing criteria"
-                                            onChange={(e) => setReferencedCategoryId(Number(e.target.value))}
-                                        >
-                                            {allCategories.map(category =>
-                                                <option key={category.id} value={category.id}>{category.name} from {category.event_name}</option>
-                                            )}
-                                        </Select>
-                                    </FormControl>
-                                    <FormControl>
-                                        <FormLabel>Percentage</FormLabel>
-                                        <Input
-                                            type="number"
-                                            value={percentage}
-                                            onChange={(e) => setPercentage(e.target.value)}
-                                        />
-                                    </FormControl>
-                                </VStack>
-                            </TabPanel>
-                        </TabPanels>
-                    </Tabs>
+                                </>
+                            ) : (
+                                <>
+                                    <Box>
+                                        {referencedCriteriaFields.map((field, index) => (
+                                            <HStack key={field.id} width="full" spacing={4}>
+                                                <FormControl flex="1">
+                                                    <FormLabel htmlFor={`referencedCriteria[${index}].reference_id`}>Reference</FormLabel>
+                                                    <Select
+                                                        id={`referencedCriteria[${index}].reference_id`}
+                                                        {...register(`referencedCriteria.${index}.reference_id`, { valueAsNumber: true })}
+                                                        placeholder="Select Reference"
+                                                    >
+                                                        {allCategories.map((category) => (
+                                                            <option key={category.category_id} value={category.category_id}>
+                                                                {category.category_name} from {category.event_name}
+                                                            </option>
+                                                        ))}
+                                                    </Select>
+                                                </FormControl>
+                                                <FormControl flex="1">
+                                                    <FormLabel htmlFor={`referencedCriteria[${index}].percentage`}>Percentage</FormLabel>
+                                                    <NumberInput min={0} max={100}>
+                                                        <NumberInputField
+                                                            id={`referencedCriteria[${index}].percentage`}
+                                                            {...register(`referencedCriteria.${index}.percentage`, { valueAsNumber: true })}
+                                                        />
+                                                    </NumberInput>
+                                                </FormControl>
+                                                <Button onClick={() => removeReference(index)}>Delete</Button>
+                                            </HStack>
+                                        ))}
+                                    </Box>
+                                    <Button variant="link" onClick={() => appendReferencedCriteria({ reference_id: 0, percentage: 0 })}>
+                                        + Add Referenced Criteria
+                                    </Button>
+                                </>
+                            )}
+                            <ModalFooter>
+                                <Button colorScheme="teal" mr={3} type="submit">
+                                    Save
+                                </Button>
+                                <Button variant="ghost" onClick={handleClose}>
+                                    Cancel
+                                </Button>
+                            </ModalFooter>
+                        </form>
+                    )}
                 </ModalBody>
-                <ModalFooter>
-                    <Button colorScheme="blue" onClick={handleSaveCategory}>
-                        Save Category
-                    </Button>
-                </ModalFooter>
             </ModalContent>
         </Modal>
     );

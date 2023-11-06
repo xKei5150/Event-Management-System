@@ -5,6 +5,7 @@ import axios from 'axios';
 
 import JudgesSection from './JudgingEvent/JudgesSection';
 import ContestantsSection from './JudgingEvent/ContestantsSection';
+import TournamentSection from "./ScoreBasedEvent/TournamentSection";
 
 // Add Score-based Event components if you have them
 // import ScoreJudgesSection from './ScoreEvent/ScoreJudgesSection';
@@ -47,9 +48,7 @@ const EventPage = () => {
             {/* Example for Score-based Events - Adjust as needed */}
             {event.event_type === "Score-based Events" && (
                 <>
-                    {/* Score-based components */}
-                    {/* <ScoreJudgesSection /> */}
-                    {/* Other components for Score-based events */}
+                   <TournamentSection/>
                 </>
             )}
         </div>
