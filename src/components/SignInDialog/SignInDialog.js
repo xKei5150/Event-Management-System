@@ -37,14 +37,14 @@ const SignInDialog = () => {
     return (
         <>
             <Button variant="primary" onClick={onOpen}>
-                Sign In
+                SIGN IN
             </Button>
 
             <Modal isOpen={isOpen} onClose={onClose}>
                 <ModalOverlay />
                 <ModalContent>
                     <ModalHeader borderBottom="3px solid #800000" color="#800000" fontWeight="bold">
-                        Sign In
+                        SIGN IN
                     </ModalHeader>
                     <ModalCloseButton />
                     <ModalBody>

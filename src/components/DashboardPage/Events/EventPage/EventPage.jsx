@@ -6,6 +6,7 @@ import axios from 'axios';
 import JudgesSection from './JudgingEvent/JudgesSection';
 import ContestantsSection from './JudgingEvent/ContestantsSection';
 import TournamentSection from "./ScoreBasedEvent/TournamentSection";
+import BreadcrumbsComponent from "./BreadcrumbsComponent";
 
 // Add Score-based Event components if you have them
 // import ScoreJudgesSection from './ScoreEvent/ScoreJudgesSection';
@@ -34,6 +35,7 @@ const EventPage = () => {
 
     return (
         <div>
+            <BreadcrumbsComponent />
             <Link to='score' isExternal>
                 Scores <HiExternalLink mx='2px' />
             </Link>

@@ -1,7 +1,13 @@
 import {
     Button, Table, Thead, Tbody, Tr, Th, Td, HStack, Heading, Text,
+    AlertDialog,
+    AlertDialogBody,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogContent,
+    AlertDialogOverlay,
 } from "@chakra-ui/react";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import AddContestantModal from './AddContestantModal';
 import axios from "axios";
 import {useParams} from "react-router-dom";
@@ -15,38 +21,80 @@ const ContestantsSection = () => {
         name: "",
         organization: "",
         level: null,
-        contestant_number: 0
+        contestant_number: null
     });
     const [isEditing, setIsEditing] = useState(false);
     const [editingIndex, setEditingIndex] = useState(null);
     const [eventId, setEventId] = useState(null);
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const cancelRef = useRef();
+
+    const onCloseAlert = () => setIsAlertOpen(false);
+    const [deleteContestantId, setDeleteContestantId] = useState(null);
 
     const openContestantModal = () => setIsContestantModalOpen(true);
 
     const closeContestantModal = () => {
         setIsContestantModalOpen(false);
-            setContestant({ name: "", organization: "", level: 0, contestant_number: 0 });
+            setContestant({ name: "", organization: "", level: null, contestant_number: null });
+        setIsEditing(false);
     };
 
-    const openEditModal = (index) => {
-        setContestant(contestants[index]);
-        setIsEditing(true);
-        setEditingIndex(index);
-        setIsContestantModalOpen(true);
-    };
-
-    const handleContestantSubmit = (contestantData, image) => {
-        if (isEditing) {
-            const updatedContestants = [...contestants];
-            updatedContestants[editingIndex] = contestantData;
-            setContestants(updatedContestants);
-            setIsEditing(false);
-            setEditingIndex(null);
-        } else {
-            setContestants([...contestants, contestantData]);
+    const deleteContestant = async (contestantId) => {
+        try {
+            const response = await axios.delete(`http://localhost:8000/v1/contestants/${contestantId}`);
+            if (response.data.status === "deleted") {
+                // Filter out the deleted contestant
+                setContestants(prevContestants => prevContestants.filter(contestant => contestant.id !== contestantId));
+            }
+        } catch (err) {
+            setError(`Error deleting contestant: ${err.message}`);
         }
+    };
+
+    const confirmDeleteContestant = (contestantId) => {
+        setDeleteContestantId(contestantId);
+        setIsAlertOpen(true);
+    };
+
+
+    const onConfirmDelete = async () => {
+        if (deleteContestantId !== null) {
+            await deleteContestant(deleteContestantId);
+        }
+        onCloseAlert();
+    };
+
+
+    const openEditModal = (contestantId) => {
+        const contestantToEdit = contestants.find(c => c.id === contestantId);
+        if (contestantToEdit) {
+            setContestant(contestantToEdit);
+            setIsEditing(true);
+            setEditingIndex(contestants.findIndex(c => c.id === contestantId)); // only if you still need the index for other purposes
+            setIsContestantModalOpen(true);
+        }
+    };
+
+    const handleContestantSubmit = (newContestant) => {
+        if (isEditing) {
+            // Update the existing contestant in the list
+            setContestants((prevContestants) =>
+                prevContestants.map((cont) =>
+                    cont.id === newContestant.id ? newContestant : cont
+                )
+            );
+            setIsEditing(false);
+        } else {
+            // Add the new contestant to the list
+            setContestants((prevContestants) => [...prevContestants, newContestant]);
+        }
+
+        // Close the modal after submitting
         closeContestantModal();
     };
+
+
 
 
     const { eventName } = useParams();  // Get the event_name from URL
@@ -81,7 +129,7 @@ const ContestantsSection = () => {
         };
 
         fetchEvent();
-    }, [eventName]);
+    }, [eventName, contestant]);
 
 
     return (
@@ -118,13 +166,16 @@ const ContestantsSection = () => {
                     </Thead>
                     <Tbody>
                         {contestants.map((contestant, index) => (
-                            <Tr key={index}>
+                            <Tr key={contestant.id}>
                                 <Td>{contestant.contestant_number}</Td>
                                 <Td>{contestant.name}</Td>
                                 <Td>{contestant.organization}</Td>
                                 <Td>{contestant.level}</Td>
                                 <Td>
-                                    <Button variant="ghost" onClick={() => openEditModal(index)}>Edit</Button>
+                                    <Button variant="ghost" onClick={() => openEditModal(contestant.id)}>Edit</Button>
+                                    <Button variant="ghost" colorScheme="red" onClick={() => confirmDeleteContestant(contestant.id)}>
+                                        Delete
+                                    </Button>
                                 </Td>
                             </Tr>
                         ))}
@@ -132,7 +183,34 @@ const ContestantsSection = () => {
                 </Table>
             )}
             {error && <Text color="red.500" mt={4}>{error}</Text>}
+            <AlertDialog
+                isOpen={isAlertOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={onCloseAlert}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            Delete Contestant
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>
+                            Are you sure you want to delete this contestant? This action cannot be undone.
+                        </AlertDialogBody>
+
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={onCloseAlert}>
+                                Cancel
+                            </Button>
+                            <Button colorScheme="red" onClick={onConfirmDelete} ml={3}>
+                                Delete
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
         </>
+
     );
 };
 

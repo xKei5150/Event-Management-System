@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { useEffect, useState } from 'react';
+import {useEffect, useRef, useState} from 'react';
 import { Link } from 'react-router-dom';
 import {
     Box,
@@ -10,11 +10,24 @@ import {
     Tr,
     Th,
     Td,
-    Heading, HStack, Flex, Spacer,
+    Heading,
+    HStack,
+    Flex,
+    Spacer,
+    useToast,
+    AlertDialogFooter,
+    AlertDialogBody,
+    AlertDialogHeader,
+    AlertDialog,
+    AlertDialogOverlay, AlertDialogContent,
 } from '@chakra-ui/react';
 
 function DashboardAnnouncement() {
     const [announcements, setAnnouncements] = useState([]);
+    const [isAlertOpen, setIsAlertOpen] = useState(false);
+    const [currentAnnouncementId, setCurrentAnnouncementId] = useState(null);
+    const cancelRef = useRef(); // Ref for the cancel button of the alert dialog
+    const toast = useToast();
 
     useEffect(() => {
         async function fetchAnnouncements() {
@@ -36,11 +49,31 @@ function DashboardAnnouncement() {
             // Refresh announcements after deleting
             const updatedAnnouncements = announcements.filter(announcement => announcement.id !== id);
             setAnnouncements(updatedAnnouncements);
+            toast({
+                title: 'Announcement Deleted',
+                description: 'The announcement has been deleted successfully.',
+                status: 'success',
+                duration: 2500,
+                isClosable: true,
+            });
         } catch (error) {
             console.error("Error deleting announcement:", error);
-            // Handle the error appropriately
+            toast({
+                title: 'Error',
+                description: 'An error occurred while deleting the announcement.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+            });
         }
     }
+
+
+    const onDeleteConfirm = () => {
+        handleDelete(currentAnnouncementId);
+        setIsAlertOpen(false);
+    }
+
 
     return (
         <Box p={5}>
@@ -75,7 +108,10 @@ function DashboardAnnouncement() {
                                         Edit
                                     </Button>
                                 </Link>
-                                <Button size="sm" colorScheme="red" onClick={() => handleDelete(announcement.id)}>
+                                <Button size="sm" colorScheme="red"  onClick={() => {
+                                    setCurrentAnnouncementId(announcement.id);
+                                    setIsAlertOpen(true);
+                                }}>
                                     Delete
                                 </Button>
                             </Td>
@@ -83,6 +119,32 @@ function DashboardAnnouncement() {
                     ))}
                 </Tbody>
             </Table>
+            <AlertDialog
+                isOpen={isAlertOpen}
+                leastDestructiveRef={cancelRef}
+                onClose={() => setIsAlertOpen(false)}
+            >
+                <AlertDialogOverlay>
+                    <AlertDialogContent>
+                        <AlertDialogHeader fontSize="lg" fontWeight="bold">
+                            Delete Announcement
+                        </AlertDialogHeader>
+
+                        <AlertDialogBody>
+                            Are you sure you want to delete this announcement? This action cannot be undone.
+                        </AlertDialogBody>
+
+                        <AlertDialogFooter>
+                            <Button ref={cancelRef} onClick={() => setIsAlertOpen(false)}>
+                                Cancel
+                            </Button>
+                            <Button colorScheme="red" onClick={onDeleteConfirm} ml={3}>
+                                Delete
+                            </Button>
+                        </AlertDialogFooter>
+                    </AlertDialogContent>
+                </AlertDialogOverlay>
+            </AlertDialog>
         </Box>
     )
 }

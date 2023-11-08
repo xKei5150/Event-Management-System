@@ -1,40 +1,31 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import Announcements from '../../Announcements/Announcements';
 import Calendar from '../../Calendar/Calendar';
 import AnnouncementDetails from '../../Announcements/AnnouncementDetails';
 import { Box, Flex } from '@chakra-ui/react';
 import { Route, Routes } from 'react-router-dom';
+import axios from "axios";
 
 
 const AnnouncementsPage = () => {
-    const announcements = [
-        { title: 'School Calendar for School Year 2023-2024',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, ' +
-                'quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu f' +
-                'ugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, ' +
-                'sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            datePosted: '2023-07-20', eventDate: '2023-08-15', location: 'MSEUFCI Campus'},
-        { title: 'Enrollment for School Year 2023-2024 has began!',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, ' +
-                'quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu f' +
-                'ugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, ' +
-                'sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            datePosted: '2023-07-20', eventDate: '2023-08-15', location: 'MSEUFCI Campus'},
-        { title: 'Congratulations to School Year 2022-2023 Graduates!',
-            description: 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, ' +
-                'quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu f' +
-                'ugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, ' +
-                'sunt in culpa qui officia deserunt mollit anim id est laborum.',
-            datePosted: '2023-07-20', eventDate: '2023-08-15', location: 'MSEUFCI Campus'},
-    ];
+    const [announcements, setAnnouncements] = useState([]);
+    const [events, setEvents] = useState([]); // If you have events for the Calendar, they should be fetched as well
 
-    const events = [
-        { title: 'Freshman Enrollment', start: '2023-07-03', end: '2023-08-12' },
-        { title: '2nd Year Enrollment', start: '2023-07-17', end: '2023-07-22' },
-        { title: '3rd Year Enrollment', start: '2023-07-24', end: '2023-08-05' },
-        { title: '4th Year Enrollment', start: '2023-08-07', end: '2023-08-12' },
-        { title: 'Classes Start!', start: '2023-08-14', end: '2023-08-14' },
-    ];
+    useEffect(() => {
+        const fetchAnnouncements = async () => {
+            try {
+                const response = await axios.get('http://localhost:8000/v1/announcements/');
+                setAnnouncements(response.data);
+                // For Calendar events, you would also set them here if they come from the same or another endpoint
+            } catch (error) {
+                console.error('Error fetching announcements:', error);
+                // Handle error, e.g., show a notification or set error state
+            }
+        };
+
+        fetchAnnouncements();
+    }, []);
+
 
     const handleDateClick = (arg) => {
         console.log('Date clicked:', arg.dateStr);
@@ -53,13 +44,16 @@ const AnnouncementsPage = () => {
                     <Announcements announcements={announcements} />
                     </Box>
                     <Box w="40%">
-                    <Calendar events={events}
-                       handleDateClick={handleDateClick}
-                       handleEventClick={handleEventClick} />
+                    <Calendar />
                     </Box>
                     </>
                 } />
-                <Route path="announcements/:id" element={<AnnouncementDetails announcements={announcements} />} />
+                {announcements ? (
+                    <Route path="announcements/:id" element={<AnnouncementDetails announcements={announcements} />} />
+                ) : (
+                    <div>Loading...</div> // Or some loading indicator
+                )}
+
             </Routes>
 
         </Flex>

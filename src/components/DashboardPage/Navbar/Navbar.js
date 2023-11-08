@@ -43,7 +43,6 @@ const MobileNav = ({ onOpen, ...rest }) => {
             </Link>
 
             <HStack spacing={{ base: '0', md: '6' }}>
-                <Notification />
                 <Flex alignItems={'center'}>
                     <Menu>
                         <MenuButton py={2} transition="all 0.3s" _focus={{ boxShadow: 'none' }}>

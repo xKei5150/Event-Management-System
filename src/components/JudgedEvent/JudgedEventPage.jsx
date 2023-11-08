@@ -12,6 +12,7 @@ import { useForm, Controller } from 'react-hook-form';
 import {calculatePoints, calculateResults} from "./calculatePoints";
 import {BeatLoader} from "react-spinners";
 import ScoresModal from "./ScoresModal";
+import AppreciationBox from "./AppreciationBox";
 
 const JudgedEventPage = () => {
     const [isLoading, setIsLoading] = useState(true);
@@ -27,6 +28,7 @@ const JudgedEventPage = () => {
     const [currentLevel, setCurrentLevel] = useState(0);
     const [scoreIds, setScoreIds] = useState([]);
     const [scoringStatus, setScoringStatus] = useState([]);
+    const [showAppreciation, setShowAppreciation] = useState(false);
 
     const inputRefs = useRef([]);
 
@@ -53,7 +55,7 @@ const JudgedEventPage = () => {
                 const contestantsResponse = await axios.get(`http://127.0.0.1:8000/v1/contestant-by-event/${eventResponse.data.id}`);
                 setContestants(contestantsResponse.data);
                 const scoringStatusResponse = await axios.get(`http://127.0.0.1:8000/v1/scoring-status/${judgeId}/${eventResponse.data.id}`);
-                const categoriesResponse = await axios.get(`http://127.0.0.1:8000/v1/categories-with-custom-criteria/?event_id=${eventResponse.data.id}`);
+                const categoriesResponse = await axios.get(`http://127.0.0.1:8000/v1/categories-with-custom-criteria/?event_id=${eventResponse.data.id}&mode=0`);
 
                 setCategories(categoriesResponse.data);
                 setScoringStatus(scoringStatusResponse.data);
@@ -67,45 +69,27 @@ const JudgedEventPage = () => {
 
         // Define the function to process scoring status
         const processScoringStatus = (scoringStatus, categories) => {
-            // Group scoring status by category
-            const groupedByCategory = scoringStatus.reduce((acc, item) => {
-                (acc[item.category_id] = acc[item.category_id] || []).push(item);
-                return acc;
-            }, {});
+            // Initial assumption is that all are scored until found otherwise
+            let allScored = true;
 
-            // Find the first unscored category and contestant
-            let foundUnscored = false;
-            for (const [categoryId, categoryGroup] of Object.entries(groupedByCategory)) {
-                const firstUnscored = categoryGroup.find(item => !item.scored);
-
-                if (firstUnscored) {
-                    const categoryIndex = categories.findIndex(category =>
-                        category.category.id === firstUnscored.category_id
-                    );
-
-                    if (categoryIndex !== -1) {
-                        setActiveCategoryIndex(categoryIndex);
-                        setCurrentLevel(firstUnscored.level);
-                        foundUnscored = true;
-                        break; // Found an unscored contestant, so break out of the loop
+            for (const status of scoringStatus) {
+                if (!status.scored) {
+                    allScored = false;
+                    // Find the active category index based on the unscored status
+                    const activeCategory = categories.find(c => c.id === status.category_id);
+                    if (activeCategory) {
+                        setActiveCategoryIndex(categories.indexOf(activeCategory));
+                        setCurrentLevel(status.level);
+                        break; // Break as soon as the first unscored category is found
                     }
                 }
             }
 
-            if (!foundUnscored) {
-                // If the loop completes and no unscored contestant is found, handle the case here
-                console.log("All contestants have been scored for the current categories.");
-                // E.g., navigate to a summary page or display a message
-            }
-            console.log(activeCategoryIndex);
-            console.log(currentLevel);
-            console.log(foundUnscored);
+            setShowAppreciation(allScored); // Only show appreciation if all categories are scored
         };
 
-
-
-
         fetchData().catch(console.error);
+        setShowAppreciation(false);
     }, [eventName, judgeId]);
 
     useEffect(() => {
@@ -267,13 +251,19 @@ const JudgedEventPage = () => {
                     </VStack>
                 </Center>
 
+                {isLoading ? (
+                    <Center><BeatLoader /></Center>
+                ) : showAppreciation ? (
+                    <AppreciationBox judgeName={judgeName} eventName={eventTitle} />
+                ) : (
+
                 <form onSubmit={handleSubmit(onFormSubmit)}>
                     <Center>
-                        <Flex flexDirection={{ base: "column", md: "row" }} gap='1em' maxWidth="800px" margin="0 auto">
+                        <Flex flexDirection={{ base: "column", md: "row" }} gap='1em' maxWidth="90%" margin="0 auto" wrap="wrap">
                             {/* Map through contestants to display form inputs */}
                             {contestantsForCurrentCategoryAndLevel.map((contestant) => (
-                                <Box key={contestant.id} bg="#333333" color="white" borderRadius="lg" p={4}>
-                                    <Flex direction="column" align="center">
+                                <Box key={contestant.id} bg="#333333" color="white" borderRadius="lg" p={4} >
+                                    <Flex direction="column" align="center" >
                                         {/* Display contestant information */}
                                         <Image
                                             src={`http://127.0.0.1:8000/v1/images/${contestant.image_path}`}
@@ -281,9 +271,9 @@ const JudgedEventPage = () => {
                                             boxSize="200px"
                                             mb={2}
                                         />
+                                        <Text fontSize="sm" fontWeight="bold">Contestant No. {contestant.contestant_number}</Text>
                                         <Text fontSize="xl" fontWeight="bold">{contestant.name}</Text>
                                         <Text fontSize="md" color="gray.400">{contestant.organization}</Text>
-                                        {/* Here we create form controls for each scoring criterion */}
                                         {categories.length > 0 && categoryWithPoints.map(criterion => (
                                             <FormControl key={criterion.id} isRequired isInvalid={errors[`score-${contestant.id}-${criterion.id}`]}>
                                                 <Flex alignItems="flex-start" mt={2}>
@@ -308,10 +298,11 @@ const JudgedEventPage = () => {
                                                             render={({ field, fieldState: { error } }) => (
                                                                 <>
                                                                     <Input
+                                                                        minW="6em"
                                                                         {...field}
                                                                         type="number"
                                                                         id={`score-${contestant.id}-${criterion.id}`}
-                                                                        placeholder={`Score (Min: ${criterion.minPoints})`}
+                                                                        placeholder={`(Min: ${criterion.minPoints})`}
                                                                         ref={(el) => { inputRefs.current.push({ current: el }); }}
                                                                     />
                                                                     {error && (
@@ -358,6 +349,7 @@ const JudgedEventPage = () => {
                         </VStack>
                     </Center>
                 </form>
+                )}
             </Box>
         </Box>
 

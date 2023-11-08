@@ -47,31 +47,53 @@ const TournamentSection = () => {
     const { eventName } = useParams();
     const formattedEventName = eventName.replace(/-/g, ' ');
     useEffect(() => {
+        let isComponentMounted = true;  // Track the mounting status
+        setIsLoading(true);
         const fetchData = async () => {
-            setIsLoading(true); // Start loading
-            try {
-                const eventResponse = await axios.get(`http://127.0.0.1:8000/v1/events/${formattedEventName}`);
-                const eventId = eventResponse.data.id;
-                setEventId(eventId);
-                const tournamentResponse = await axios.get(`http://localhost:8000/v1/tournaments/${eventResponse.data.id}`);
-                if (tournamentResponse.data) {
-                    setTournamentDetails({
-                        tournamentName: tournamentResponse.data.tournament_name,
-                        eliminationType: tournamentResponse.data.elimination_type,
-                    });
-                }
-                const teamsResponse = await axios.get(`http://localhost:8000/v1/teams?event_id=${eventId}`);
-                setTeams(teamsResponse.data);
+            if (isComponentMounted) {
+                setIsLoading(true); // Start loading
+                try {
+                    const eventResponse = await axios.get(`http://127.0.0.1:8000/v1/events/${formattedEventName}`);
+                    if (!isComponentMounted) return; // Exit if the component has been unmounted
+                    const eventId = eventResponse.data.id;
+                    setEventId(eventId);
 
-            } catch (error) {
-                console.error("Error fetching data:", error);
-            } finally {
-                setIsLoading(false); // Stop loading regardless of outcome
+                    const tournamentResponse = await axios.get(`http://localhost:8000/v1/tournaments/${eventId}`);
+                    if (!isComponentMounted) return; // Exit if the component has been unmounted
+                    if (tournamentResponse.data) {
+                        setTournamentDetails({
+                            tournamentName: tournamentResponse.data.tournament_name,
+                            eliminationType: tournamentResponse.data.elimination_type,
+                        });
+                    }
+
+                    const teamsResponse = await axios.get(`http://localhost:8000/v1/teams?event_id=${eventId}`);
+                    if (!isComponentMounted) return; // Exit if the component has been unmounted
+                    setTeams(teamsResponse.data);
+                } catch (error) {
+                    console.error("Error fetching data:", error);
+                } finally {
+                    if (isComponentMounted) {
+                        setIsLoading(false); // Stop loading regardless of outcome
+                    }
+                }
             }
         };
 
         fetchData();
-    },  [eventId, setIsLoading, setTournamentDetails, toast]);
+
+        // This return function cleans up when the component unmounts or eventName changes.
+        return () => {
+            isComponentMounted = false;
+            setIsLoading(false);
+            setTeams([]); // Reset teams
+            setTournamentDetails({
+                tournamentName: '',
+                eliminationType: '',
+            }); // Reset tournament details
+            // You might not want to clear eventId if it's used for other purposes outside of this effect.
+        };
+    }, [eventName]);
 
 
     const { register, handleSubmit, setValue, formState: { errors } } = useForm({

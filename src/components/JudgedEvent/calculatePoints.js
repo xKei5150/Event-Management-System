@@ -6,7 +6,7 @@ export function calculatePoints(customCriteria) {
 
         return {
             ...criterion,
-            minPoints: minPoints,
+            minPoints: Math.ceil(minPoints),
             maxPoints: maxPoints
         };
     });

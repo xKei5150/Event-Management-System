@@ -43,7 +43,7 @@ const DashboardSidebar = ({ onClose, ...rest }) => {
 
         return () => { isMounted = false; }  // Clean up: Set isMounted to false when component unmounts
 
-    }, []);
+    }, [collapsedSections]);
     const toggleSection = (section) => {
         setCollapsedSections(prev => ({ ...prev, [section]: !prev[section] }));
     };

@@ -22,10 +22,10 @@ function DashboardNavbar() {
                 </Box>
                 <Spacer />
                 <Box as="nav" className="text-lg font-bold">
-                    <Link to="/" className="text-red-900 ml-5 mr-3">Home</Link>
-                    <Link to="/announcements" className="text-red-900 mx-3">Announcements</Link>
-                    <Link to="/forms" className="text-red-900 mx-3">Events</Link>
-                    <Link to="/about" className="text-red-900 mx-3">About</Link>
+                    <Link to="/" className="text-red-900 ml-5 mr-3">HOME</Link>
+                    <Link to="/announcements" className="text-red-900 mx-3">ANNOUNCEMENTS</Link>
+                    <Link to="/tournaments" className="text-red-900 mx-3">EVENTS</Link>
+                    <Link to="/about" className="text-red-900 mx-3">ABOUT</Link>
 
                 </Box>
                 <SignInDialog />

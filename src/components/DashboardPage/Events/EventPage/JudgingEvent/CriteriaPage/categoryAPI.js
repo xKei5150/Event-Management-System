@@ -16,9 +16,18 @@ export const addCategory = async (categoryName, mode, eventId) => {
     }
 };
 
-export const fetchCategoriesAPI = async () => {
+export const deleteCategory = async (categoryId) => {
     try {
-        const response = await axios.get(`${BASE_URL}categories/`);
+        const response = await axios.delete(`${BASE_URL}categories/${categoryId}`);
+        return response.data;
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        throw error;
+        }
+    };
+export const fetchCategoriesAPI = async (event_id) => {
+    try {
+        const response = await axios.get(`${BASE_URL}categories/${event_id}`);
         return response.data;
     } catch (error) {
         console.error('Error fetching categories:', error);

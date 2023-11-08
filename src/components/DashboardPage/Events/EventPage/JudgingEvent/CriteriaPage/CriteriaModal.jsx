@@ -21,7 +21,7 @@ import {
 import { useForm, useFieldArray } from 'react-hook-form';
 
 // Assuming fetchCategory, fetchCategoryDetails, fetchCriteria, updateCategory are correctly implemented
-import { fetchCategory, fetchCategoryDetails, fetchCriteria, updateCategory } from "./categoryAPI";
+import { fetchCategory, fetchCriteria, updateCategory } from "./categoryAPI";
 
 const CriteriaModal = ({ isOpen, onClose, allCategories, categoryId }) => {
     const [isLoading, setIsLoading] = React.useState(false);

@@ -6,6 +6,7 @@ import {Link, useParams} from "react-router-dom";
 import CriteriaPage from "../JudgingEvent/CriteriaPage/CategoryPage";
 import MatchupsPage from "../ScoreBasedEvent/MatchupsPage";
 import ScorePanel from "../JudgingEvent/ScorePanel";
+import BreadcrumbsComponent from "../BreadcrumbsComponent";
 const Score = () => {
     const [eventType, setEventType] = useState(null);
     const [eventId, setEventId] = useState(null);
@@ -30,6 +31,7 @@ const Score = () => {
 
     return (
         <div>
+            <BreadcrumbsComponent />
             <HStack>
                 <Heading as="h2" mt={10}>
                     Scores

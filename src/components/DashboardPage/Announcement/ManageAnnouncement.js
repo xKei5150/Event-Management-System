@@ -1,175 +1,279 @@
-import {Box, Button, Checkbox, FormControl, FormLabel, Heading, Input} from '@chakra-ui/react';
-import 'react-datepicker/dist/react-datepicker.css';
-import DatePicker from 'react-datepicker';
+// ManageAnnouncements.jsx
+import React, {useCallback, useEffect, useMemo, useRef} from 'react';
+import {Controller, useForm} from 'react-hook-form';
+import { Box, Button, Checkbox, FormControl, FormLabel, Heading, Input, useToast } from '@chakra-ui/react';
 import ReactQuill from 'react-quill';
+import DatePicker from 'react-datepicker';
 import 'react-quill/dist/quill.snow.css';
+import 'react-datepicker/dist/react-datepicker.css';
 import axios from 'axios';
-import { useEffect, useState } from 'react';
-import {useParams} from "react-router-dom";
+
+import { useParams, useNavigate  } from "react-router-dom";
 
 function ManageAnnouncements() {
     const { announcementId } = useParams();
-    const [announcementTitle, setAnnouncementTitle] = useState('');
-    const [description, setDescription] = useState('');
-    const [location, setLocation] = useState('');
-    const [startDate, setStartDate] = useState(null);
-    const [endDate, setEndDate] = useState(null);
-    const [addEventDate, setAddEventDate] = useState(false);
-    const [isLoading, setIsLoading] = useState(false);
-    const handleCheckboxChange = () => {
-        setAddEventDate(!addEventDate);
-    };
+    const { register, control, handleSubmit, setValue, watch, formState: { errors } } = useForm({
+        defaultValues: {
+            addEventDate: false,
+        },
+    });
+    const isEditing = !!announcementId;
+    const addEventDate = watch('addEventDate', false);
+    const toast = useToast();
+    const navigate = useNavigate();
+    const quillRef = useRef(null);
+
+
+
 
     useEffect(() => {
-        async function fetchAnnouncementData() {
-            if (announcementId) {
-                try {
-                    const response = await axios.get(`http://localhost:8000/v1/announcements/id/${announcementId}`);
+        if (announcementId) {
+            // Fetch the existing announcement data to prefill the form
+            axios.get(`http://localhost:8000/v1/announcements/id/${announcementId}`)
+                .then(response => {
+                    const data = response.data;
+                    // Prefill the form
+                    setValue('announcement', data.announcement);
+                    setValue('description', data.description);
+                    setValue('location', data.location);
+                    setValue('startDate', data.startDate ? new Date(data.startDate) : null);
+                    setValue('endDate', data.endDate ? new Date(data.endDate) : null);
 
-                    setAnnouncementTitle(response.data.announcement);
-                    setDescription(response.data.description);
-                    setLocation(response.data.location);
-                    setStartDate(response.data.startDate ? new Date(response.data.startDate) : null);
-                    setEndDate(response.data.endDate ? new Date(response.data.endDate) : null);
-                } catch (error) {
+                    // Automatically check the addEventDate checkbox if dates are   available
+                    setValue('addEventDate', !!(data.startDate || data.endDate));
+                })
+                .catch(error => {
                     console.error("Error fetching announcement data:", error);
-                    // Handle the error appropriately
-                } finally {
-                    setIsLoading(false);
-                }
-            }
+                });
         }
+    }, [announcementId, setValue]);
 
-        fetchAnnouncementData();
-    }, [announcementId]);
-
-    const handleSubmit = async () => {
+    const onSubmit = async (data) => {
         try {
-            if (announcementId) {
-                // Update the existing announcement
-                await axios.put(`http://localhost:8000/v1/announcements/id/${announcementId}`, {
-                    announcement: announcementTitle,
-                    description: description,
-                    location: location,
-                    startDate: startDate ? startDate.toISOString() : null,
-                    endDate: endDate ? endDate.toISOString() : null
+            if (isEditing) {
+                await axios.put(`http://localhost:8000/v1/announcements/id/${announcementId}`, data);
+                toast({
+                    title: 'Announcement updated.',
+                    description: 'The announcement has been successfully updated.',
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top',
                 });
             } else {
-                // Create a new announcement
-                await axios.post('http://localhost:8000/v1/add-announcement/', {
-                    announcement: announcementTitle,
-                    description: description,
-                    location: location,
-                    startDate: startDate ? startDate.toISOString() : null,
-                    endDate: endDate ? endDate.toISOString() : null
+                await axios.post('http://localhost:8000/v1/add-announcement/', data);
+                toast({
+                    title: 'Announcement created.',
+                    description: 'A new announcement has been successfully created.',
+                    status: 'success',
+                    duration: 5000,
+                    isClosable: true,
+                    position: 'top',
                 });
             }
-            // Handle successful submission: notify the user, redirect, etc.
+            navigate(-1);
         } catch (error) {
             console.error("Error submitting the form:", error);
-            // Handle the error appropriately
+            toast({
+                title: 'An error occurred.',
+                description: 'Unable to submit the form. Please try again.',
+                status: 'error',
+                duration: 5000,
+                isClosable: true,
+                position: 'top',
+            });
         }
-    }
-    const isEditing = !!announcementId;
+    };
+
+
+    const QuillEditor = React.forwardRef((props, ref) => (
+        <ReactQuill ref={ref} {...props} />
+    ));
+
+
+
+    const imageHandler = useCallback(() => {
+        const input = document.createElement('input');
+        input.setAttribute('type', 'file');
+        input.setAttribute('accept', 'image/*');
+
+        // Save the current range
+        const currentRange = quillRef.current.getEditor().getSelection();
+
+        input.click();
+
+        input.onchange = async () => {
+            const file = input.files[0];
+            if (file) {
+                const formData = new FormData();
+                formData.append('image', file);
+
+                const uploadUrl = 'http://localhost:8000/v1/upload-image';
+
+                try {
+                    const response = await axios.post(uploadUrl, formData, {
+                        headers: {
+                            'Content-Type': 'multipart/form-data',
+                        },
+                    });
+
+                    const imageUrl = response.data.url;
+                    console.log('Image URL:', imageUrl); // Log the URL to verify it
+
+                    if (quillRef.current) {
+                        const editor = quillRef.current.getEditor();
+                        // Restore the selection if it was lost
+                        if (currentRange) {
+                            editor.setSelection(currentRange);
+                        }
+                        const range = editor.getSelection(true);
+
+                        if (range) {
+                            editor.insertEmbed(range.index, 'image', imageUrl);
+                        } else {
+                            // Fallback to insert at the end of the editor content
+                            const length = editor.getLength();
+                            editor.insertEmbed(length, 'image', imageUrl);
+                        }
+                    } else {
+                        console.error("The editor has not been initialized yet.");
+                        toast({
+                            title: 'Editor not ready.',
+                            description: 'The editor is not yet ready to insert the image.',
+                            status: 'error',
+                            duration: 5000,
+                            isClosable: true,
+                            position: 'top',
+                        });
+                    }
+                } catch (error) {
+                    console.error('Error uploading image: ', error);
+                    toast({
+                        title: 'Image upload failed.',
+                        description: 'Could not upload image. Please try again.',
+                        status: 'error',
+                        duration: 5000,
+                        isClosable: true,
+                        position: 'top',
+                    });
+                }
+            }
+        };
+    }, [toast]);
+
+
+
+    const modules = useMemo(() => ({
+        toolbar: {
+            container: [
+                ['bold', 'italic', 'underline', 'strike', 'blockquote'],
+                [{ header: '1' }, { header: '2' }, { font: [] }],
+                [{ list: 'ordered' }, { list: 'bullet' }, { indent: '-1' }, { indent: '+1' }],
+                ['link', 'image', 'video'],
+                ['clean'],
+            ],  'handlers': {
+                image: imageHandler,
+            }
+        }
+    }), [imageHandler])
+
     return (
-            <Box>
-                <Heading as="h2" size="lg" mb="4" color="red.900">
-                    {isEditing ? "Update Announcement" : "Add New Announcement"}
-                </Heading>
-                <Box bg="gray.200" p={6} borderRadius="md">
-                    <FormControl mb={4}>
-                        <FormLabel htmlFor="announcement-title">Announcement Title</FormLabel>
-                        <Input
-                            value={announcementTitle}
-                            onChange={(e) => setAnnouncementTitle(e.target.value)}
-                            required
-                            id="announcement-title"
-                            variant="outline"
-                            borderColor="black"
-                            _hover={{borderColor: 'red.700'}}
-                            _focus={{ borderColor: 'red.900' }}
-                        />
-                    </FormControl>
+        <Box minW="75vh" mx="auto" mt="5" borderWidth="1px" borderRadius="lg" overflow="hidden">
+            <Heading as="h2" size="xl" mb="4" bg="maroon" color="white" textAlign="center" py="2">
+                {isEditing ? "UPDATE ANNOUNCEMENT" : "ADD NEW ANNOUNCEMENT"}
+            </Heading>
+            <Box
+                as="form"
+                onSubmit={handleSubmit(onSubmit)}
+                bg="gray.200"
+                p={6}
+                borderRadius="md"
+                boxShadow="md"
+            >
+                <FormControl mb={4} isInvalid={errors.announcement}>
+                    <FormLabel htmlFor="announcement-title">Announcement Title</FormLabel>
+                    <Input {...register('announcement', { required: 'This field is required' })} id="announcement-title" placeholder="Enter title here" />
+                    {errors.announcement && <Box color="red.500" fontSize="sm">{errors.announcement.message}</Box>}
+                </FormControl>
 
-                    <FormControl mb={4}>
-                        <FormLabel htmlFor="description">Description</FormLabel>
-                        <ReactQuill
-                            value={description}
-                            onChange={setDescription}
-
-                            modules={{
-                                toolbar: [
-                                    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-                                    [{ header: '1' }, { header: '2' }, { font: [] }],
-                                    [{ list: 'ordered' }, { list: 'bullet' },
-                                        {'indent': '-1'}, {'indent': '+1'}],
-                                    ['link', 'image', 'video'],
-                                    ['clean'],
-                                ],
-                            }}
-                            style={{
-                                minHeight: "200px",
-                                overflowY: "auto",
-                                backgroundColor: 'white',
-                                borderColor: 'black',
-                                ':hover': { borderColor: 'red.700' },
-                                ':focus': { borderColor: 'red.900' },
-                            }}
-                        />
-                    </FormControl>
-
-                    <FormControl mb={4}>
-                        <FormLabel htmlFor="place">Location</FormLabel>
-                        <Input
-                            value={location}
-                            onChange={(e) => setLocation(e.target.value)}
-                            required
-                            id="place"
-                            variant="outline"
-                            borderColor="black"
-                            _hover={{borderColor: 'red.700'}}
-                            _focus={{ borderColor: 'red.900' }}
-                        />
-                    </FormControl>
-
-                    <FormControl mb={4}>
-                        <Checkbox
-                            isChecked={addEventDate}
-                            onChange={handleCheckboxChange}
-                        >
-                            Add Event Date
-                        </Checkbox>
-                    </FormControl>
-
-                    {addEventDate && (
-                        <FormControl mb={4}>
-                            <FormLabel>Start Date</FormLabel>
-                            <DatePicker
-                                selected={startDate ? startDate : null}
-                                onChange={(date) => setStartDate(date)}
-                                dateFormat="yyyy-MM-dd"
-                                placeholderText="yyyy-MM-dd"
+                <FormControl mb={4}>
+                    <FormLabel htmlFor="description">Description</FormLabel>
+                    <Controller
+                        control={control}
+                        name="description"
+                        render={({ field }) => (
+                            <QuillEditor
+                                {...field}
+                                modules={modules}
+                                ref={quillRef}
+                                style={{
+                                    minHeight: "200px",
+                                    overflowY: "auto",
+                                    backgroundColor: 'white',
+                                    borderColor: 'gray.300',
+                                }}
                             />
-                        </FormControl>
-                    )}
+                        )}
+                    />
+                </FormControl>
 
-                    {addEventDate && (
-                        <FormControl mb={4}>
-                            <FormLabel>End Date</FormLabel>
-                            <DatePicker
-                                selected={endDate ? endDate : null}
-                                onChange={(date) => setEndDate(date)}
-                                dateFormat="yyyy-MM-dd"
-                                placeholderText="yyyy-MM-dd "
-                            />
-                        </FormControl>
-                    )}
-                    <Button type="submit" variant="primary" onClick={handleSubmit}>
-                        {isEditing ? "Update" : "Submit"}
-                    </Button>
-                </Box>
+                <FormControl mb={4}>
+                    <FormLabel htmlFor="place">Location</FormLabel>
+                    <Input {...register('location')} id="place" placeholder="Enter location here" />
+                </FormControl>
+
+                <FormControl mb={4} display="flex" alignItems="center">
+                    <Checkbox {...register('addEventDate')} mr="2">Add Event Date</Checkbox>
+                </FormControl>
+
+                {addEventDate && (
+                    <Box mb={4}>
+                        <Controller
+                            control={control}
+                            name="startDate"
+                            render={({ field }) => (
+                                <DatePicker
+                                    placeholderText="Select start date"
+                                    onChange={(date) => field.onChange(date)}
+                                    selected={field.value}
+                                    dateFormat="yyyy-MM-dd"
+                                />
+                            )}
+                        />
+
+                        <Controller
+                            control={control}
+                            name="endDate"
+                            render={({ field }) => (
+                                <DatePicker
+                                    placeholderText="Select end date"
+                                    onChange={(date) => field.onChange(date)}
+                                    selected={field.value}
+                                    dateFormat="yyyy-MM-dd"
+                                />
+                            )}
+                        />
+                    </Box>
+                )}
+
+                <Button
+                    colorScheme="blue"
+                    type="submit"
+                    w="full"
+                    mt="4"
+                    _hover={{
+                        transform: 'scale(1.02)',
+                    }}
+                    _active={{
+                        transform: 'scale(0.98)',
+                    }}
+                >
+                    {isEditing ? "Update" : "Submit"}
+                </Button>
             </Box>
-    )
-}
+        </Box>
+    );
+};
+
 
 export default ManageAnnouncements;

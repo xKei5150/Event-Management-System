@@ -5,6 +5,7 @@ import {
     Stack,
     Divider, Avatar,
 } from '@chakra-ui/react';
+import Calendar from '../Calendar/Calendar';
 
 const DashboardPage = () => {
     return (
@@ -23,7 +24,7 @@ const DashboardPage = () => {
             </Stack>
             <Divider my="4" />
             <Stack spacing="4">
-                <Text fontSize="xl">EVENTS</Text>
+                <Calendar />
             </Stack>
         </Box>
     );
